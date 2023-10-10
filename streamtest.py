@@ -58,12 +58,11 @@ if choose == "Estabelecimentos":
 # A VARIAVEL ARMAZENA OS ANOS COMO INDICE E A CONTAGEM DOS ESTABELECIMENTOS COM OS VALORES CORRESPONDENTES
     contagem_anos = df.groupby(df['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
 
-# O GRÁFICO COM O EFEITO HOVER
+#efeito hover
     fig = go.Figure(data=go.Scatter(x=contagem_anos['DATA STC'], y=contagem_anos['CNPJ O'],
                                mode='lines+markers', hovertext=df['CNPJ O'],
                                hovertemplate='CNPJ: %{hovertext}<br>Quantidade: %{y}<extra></extra>'))
 
-# O LAYOUT DO GRÁFICO
     fig.update_layout(
     title='Número de estabelecimentos por ano',
     xaxis_title='Ano',
@@ -90,17 +89,16 @@ if choose == "Estabelecimentos":
     title_x=0.30,
     title_font=dict(size=20),
     width=750,
-    barmode='stack'  # Essa opção define o modo de empilhamento das barras
+    barmode='stack'  
     )
 
-# Filtro dos dados baseado no intervalo de anos selecionado
+#filtro dos dados baseado no intervalo de anos selecionado
     filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
 
-# Atualização do gráfico com os dados filtrados
     fig.data[0].x = filtered_data['DATA STC']
     fig.data[0].y = filtered_data['CNPJ O']
 
-# Exibição do gráfico com Streamlit
+
     st.plotly_chart(fig) 
     #fim grafico 1
 
@@ -108,10 +106,8 @@ if choose == "Estabelecimentos":
     contagem_atividades = df['CNAE PRINCP'].value_counts()
     top_3_atividades = contagem_atividades.nlargest(3)
 
-    # Cria um DataFrame com os dados das atividades econômicas mais frequentes
     top_3_df = pd.DataFrame({'Atividade': top_3_atividades.index, 'Frequência': top_3_atividades.values})
 
-    # Cria um gráfico de pizza interativo usando o Plotly Express
     fig = px.pie(top_3_df, values='Frequência', names='Atividade')
 
     fig.update_layout(
@@ -128,10 +124,8 @@ if choose == "Estabelecimentos":
     contagem_atividades_inativas = df_inativas['CNAE PRINCP'].value_counts()
     top_3_atividades_inativas = contagem_atividades_inativas.nlargest(3)
 
-    # Cria um DataFrame com os dados das atividades econômicas mais frequentes
     top_3_df_inativas = pd.DataFrame({'Atividade': top_3_atividades_inativas.index, 'Frequência': top_3_atividades_inativas.values})
 
-    # Cria um gráfico de pizza interativo usando o Plotly Express
     fig = px.pie(top_3_df_inativas, values='Frequência', names='Atividade')
 
     fig.update_layout(
@@ -188,83 +182,9 @@ elif choose == "Sobre":
 #st.plotly_chart(fig)
 
 
-#GRAFICO 4
-#fig = px.histogram(df, x='DT IN ATV', nbins=20,
- #                  title='Distribuição dos Anos de Início da Atividade dos Estabelecimentos')
-
-#fig.update_xaxes(title_text='Ano de Início')
-#fig.update_yaxes(title_text='Quantidade')
-#st.plotly_chart(fig)
-
-#ESSE É P GRAFICO D EDENSIDADE, LEGAL PORÉM MEIO CONFUSO
-#LEGAL ESSE, VERIFICAR DEPOIS SE ELE VAI FICAR 
-#GRAFICO 5
-#fig = px.density_heatmap(df, x='DT IN ATV', title='Distribuição de Estabelecimentos')
-#fig.update_xaxes(title_text='Ano de Início')
-
-#fig.update_yaxes(title_text='Densidade')
-
-#fig.update_layout(
-#title_x=0.28,
-#title_font=dict(size=20))
-
-#st.plotly_chart(fig)
-
-
-#with st.sidebar: 
- #   selected = option_menu("Menu", ["Home Settings", "Teste"],
-  #                         icons=['house', 'gear'], menu_icon="cast", default_index=0)
-    
-#if selected == "Teste":
- #   st.write("Página de teste")
-        
-  #  fig = px.density_heatmap(df, x='DT IN ATV', title='Distribuição dos Anos de Início da Atividade - Densidade')
-   # fig.update_xaxes(title_text='Ano de Início')
-
-    #fig.update_yaxes(title_text='Densidade')
-
-    #st.plotly_chart(fig)
-#elif selected == "Home Settings":
- #   st.write("Outra página")
 
 
 
-#from geopy.geocoders import Nominatim
-#import folium
-
-# Carrega o DataFrame com os dados do arquivo CSV
-#df = pd.read_csv('seuarquivo.csv')
-
-# Cria um objeto geocoder do Nominatim
-#geolocator = Nominatim(user_agent="geoapiExercises")
-
-# Função para obter as coordenadas de latitude e longitude
-#def get_coordinates(address):
- #   location = geolocator.geocode(address)
-  #  if location:
-   #     return location.latitude, location.longitude
-    #return None, None
-
-# Adiciona colunas de latitude e longitude ao DataFrame
-#df['latitude'], df['longitude'] = zip(*df.apply(lambda row: get_coordinates(f"{row['TIPO LOGR']}, {row['LOGRD']}, {row['BAIRRO']}, {row['MUNICIPIO']}, {row['UF']},"), axis=1))
-
-# Filtra apenas os registros com coordenadas válidas
-#df = df.dropna(subset=['latitude', 'longitude'])
-
-# Cria um mapa inicial
-#m = folium.Map(location=[df['latitude'].mean(), df['longitude'].mean()], zoom_start=12)
-
-# Adiciona marcadores para cada estabelecimento no mapa
-#for index, row in df.iterrows():
- #   folium.Marker(
-  #      location=[row['latitude'], row['longitude']],
-   #     popup=row['NOME FANT'],
-    #    icon=folium.Icon(icon='cloud')  # Escolha o ícone que desejar
-    #).add_to(m)
-
-
-
-#st.markdown(m._repr_html_(), unsafe_allow_html=True)
 
 #teste pro grafico das localizações
 #import folium
@@ -301,6 +221,22 @@ if __name__ == "__main__":
     main()
 
 
+import folium
+
+dfloc = pd.read_csv('estabGeolocalizado.csv')
+
+m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=12)
+
+for index, row in dfloc.iterrows():
+    folium.Marker(
+        location=[row['Latitude'], row['Longitude']],
+        popup=row['LOGRD'],  
+        icon=folium.Icon(icon='cloud')  
+    ).add_to(m)
+
+st.title('Mapa de Localizações')
+st.write('Visualização de localizações a partir das coordenadas de latitude e longitude.')
+st.write(m)
 
 
 
