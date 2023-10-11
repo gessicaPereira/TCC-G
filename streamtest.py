@@ -157,14 +157,14 @@ elif choose == "Localizações":
     import folium
     from streamlit_folium import st_folium
 
-    dfloc = pd.read_csv('estabGeolocalizado.csv')
+    dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
 
-    m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=7)
+    m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=9)
 
     for index, row in dfloc.iterrows():
         folium.Marker(
         location=[row['Latitude'], row['Longitude']],
-        popup=row['LOGRD'],  
+        popup=row['NOME FANT'],  
         icon=folium.Icon(icon='home')  
     ).add_to(m)
 
