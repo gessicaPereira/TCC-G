@@ -48,9 +48,9 @@ with st.sidebar:
 #profile = Image.open(r'C:\Users\08897\TCC\BASECOMPLETA\gatodois.jpg')
 if choose == "Estabelecimentos": 
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([0.4, 2])
     
-#INICIO GRÁFICO 1 - PRA MIM GRÁFICO 1 ESTÁ OK
+#INICIO GRÁFICO 1 - PRA MIM GRÁFICO 1 ESTÁ OK - OK COM O FILTRO
     df['DATA STC'] = pd.to_datetime(df['DATA STC'])
 
 # AQUI EU VOU ACESSAR A PROPIEDADE ANO DA DATA DE SITUAÇÃO CADASTRAL PARA AGRUPAR E CONTAR A PARTIR DO 
@@ -58,91 +58,107 @@ if choose == "Estabelecimentos":
 # A VARIAVEL ARMAZENA OS ANOS COMO INDICE E A CONTAGEM DOS ESTABELECIMENTOS COM OS VALORES CORRESPONDENTES
     contagem_anos = df.groupby(df['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
 
-#efeito hover
-    fig = go.Figure(data=go.Scatter(x=contagem_anos['DATA STC'], y=contagem_anos['CNPJ O'],
-                               mode='lines+markers', hovertext=df['CNPJ O'],
-                               hovertemplate='CNPJ: %{hovertext}<br>Quantidade: %{y}<extra></extra>'))
+    with col1: 
+        selected_years = st.slider("Selecione o intervalo de anos", int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max()), (int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max())))
+        filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
 
-    fig.update_layout(
-    title='Número de estabelecimentos por ano',
-    xaxis_title='Ano',
-    yaxis_title='Quantidade de Estabelecimentos',
-    title_x=0.28,
-    title_font=dict(size=20),
-    width= 750
-    )
-    st.plotly_chart(fig) 
+    with col2:
+#efeito hover
+        fig = go.Figure(data=go.Scatter(x=filtered_data['DATA STC'], y=filtered_data['CNPJ O'],
+                                mode='lines+markers', hovertext=df['CNPJ O'],
+                                hovertemplate='CNPJ: %{hovertext}<br>Quantidade: %{y}<extra></extra>'))
+
+        fig.update_layout(
+        title='Abertura de estabelecimentos por ano',
+        xaxis_title='Ano',
+        yaxis_title='Quantidade de Estabelecimentos',
+        title_x=0.33,
+        title_font=dict(size=20),
+        width= 750
+        )
+        st.plotly_chart(fig) 
     #fim grafico 1
 
 
-#INICIO GRÁFICO INATIVAS 
+#INICIO GRÁFICO INATIVAS - OK - NÃO MEXER MAIS
     df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'])
 
     contagem_anos = df_inativas.groupby(df_inativas['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
 
-    selected_years = st.slider("Selecione o intervalo de anos", int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max()), (int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max())))
-    fig = px.bar(contagem_anos, x='DATA STC', y='CNPJ O', title='Número de estabelecimentos inativos')
+    col1, col2 = st.columns([0.4, 2])
 
-    fig.update_layout(
-    xaxis_title='Ano',
-    yaxis_title='Quantidade ',
-    title_x=0.30,
-    title_font=dict(size=20),
-    width=750,
-    barmode='stack'  
-    )
+    with col1:
+        selected_years = st.slider("Selecione o intervalo de anos", int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max()), (int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max())))
+        filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
 
-#filtro dos dados baseado no intervalo de anos selecionado
-    filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
+    with col2:
+        fig = px.bar(filtered_data, x='DATA STC', y='CNPJ O', title='Inatividade de estabelecimentos por ano')
 
-    fig.data[0].x = filtered_data['DATA STC']
-    fig.data[0].y = filtered_data['CNPJ O']
+        fig.update_layout(
+        xaxis_title='Ano',
+        yaxis_title='Quantidade ',
+        title_x=0.30,
+        title_font=dict(size=20),
+        width=750,
+        barmode='stack')
+    
+        st.plotly_chart(fig)
 
-
-    st.plotly_chart(fig) 
 #fim grafico 1
 
- #INICIO GRAFICO 2
+ #INICIO GRAFICO 2 - OK COM O FILTRO 
+    col1, col2 = st.columns([0.4, 2])
     contagem_atividades = df['CNAE PRINCP'].value_counts()
-    top_3_atividades = contagem_atividades.nlargest(3)
 
-    top_3_df = pd.DataFrame({'Atividade': top_3_atividades.index, 'Frequência': top_3_atividades.values})
+    with col1: 
+        num_atividades_para_mostrar = st.slider("Selecione o número de atividades a serem exibidas", 1, len(contagem_atividades), 3)
+        top_atividades = contagem_atividades.nlargest(num_atividades_para_mostrar)
 
-    fig = px.pie(top_3_df, values='Frequência', names='Atividade')
+    with col2: 
 
-    fig.update_layout(
-    title='Três atividades econômicas mais presentes',
-    height=450,
-    title_font=dict(size=20),
-    title_x=0.25,
-    width=800, 
-    legend=dict(
-        orientation='h'))
-    st.plotly_chart(fig)
+        top_df = pd.DataFrame({'Atividade': top_atividades.index, 'Frequência': top_atividades.values})
 
-#INICIO GRAFICO 3 - inativos
+        fig = px.pie(top_df, values='Frequência', names='Atividade')
+
+        fig.update_layout(
+        title=f'As {num_atividades_para_mostrar} atividades econômicas mais presentes',
+        height=450,
+        title_font=dict(size=20),
+        title_x=0.25,
+        width=800, 
+        legend=dict(
+            orientation='h'))
+        st.plotly_chart(fig)
+
+#INICIO GRAFICO 3 - inativos - OK COM O FILTRO
+    col1, col2 = st.columns([0.4, 2])
     contagem_atividades_inativas = df_inativas['CNAE PRINCP'].value_counts()
-    top_3_atividades_inativas = contagem_atividades_inativas.nlargest(3)
 
-    top_3_df_inativas = pd.DataFrame({'Atividade': top_3_atividades_inativas.index, 'Frequência': top_3_atividades_inativas.values})
+    with col1: 
+        num_atividades_inativas_para_mostrar = st.slider("Selecione o número de atividades a serem exibidas", 1, len(contagem_atividades_inativas), 3)
+        top_atividades_inativas = contagem_atividades_inativas.nlargest(num_atividades_inativas_para_mostrar)
 
-    fig = px.pie(top_3_df_inativas, values='Frequência', names='Atividade')
+    with col2:
+        top_df_inativas = pd.DataFrame({'Atividade': top_atividades_inativas.index, 'Frequência': top_atividades_inativas.values})
 
-    fig.update_layout(
-    title='Atividades econômicas inativas',
-    height=450,
-    title_font=dict(size=20),
-    title_x=0.25,
-    width=800, 
-    legend=dict(
-        orientation='h'))
-    st.plotly_chart(fig)
+        fig = px.bar_polar(top_df_inativas, r='Frequência', theta='Atividade', labels={'Frequência': 'Contagem'})
+        fig.update_traces(hovertemplate='%{x}: %{r}')
+        fig.update_layout(
+        title=f'Principais {num_atividades_inativas_para_mostrar} atividades economicas descontinuadas',
+        height=450,
+        title_font=dict(size=20),
+        title_x=0.23,
+        width=800, 
+        legend=dict(
+            orientation='h', 
+            font=dict(size=12)))
+        st.plotly_chart(fig)
 
     
 #filtro estabelecimentos ativos pela atividade selecionada
-    st.title("CNAES")
-
-    selected_activity = st.selectbox("Filtrar por atividade", df['CNAE PRINCP'].unique())
+    st.title("PESQUISA POR CNAES")
+    
+    selected_activity = st.selectbox("SELECIONE A ATIVIDADE:", df['CNAE PRINCP'].unique())
 
     filtered_estabelecimentos = df[df['CNAE PRINCP'] == selected_activity]
 
@@ -151,6 +167,15 @@ if choose == "Estabelecimentos":
     table_data = filtered_estabelecimentos[['NOME FANT', 'BAIRRO']]
     st.table(table_data)
 
+    st.subheader("Distribuição por Bairro")
+    total_estabelecimentos = len(filtered_estabelecimentos)
+    st.write(f"- Total de Estabelecimentos: {total_estabelecimentos}")
+    bairro_counts = filtered_estabelecimentos['BAIRRO'].value_counts()
+    bairro_counts_df = pd.DataFrame({'Bairro': bairro_counts.index, 'Contagem': bairro_counts.values})
+    st.bar_chart(bairro_counts_df.set_index('Bairro'))
+
+    table_data = filtered_estabelecimentos[['NOME FANT', 'BAIRRO']]
+
 elif choose == "Localizações":
 
 #MAPA
@@ -158,6 +183,8 @@ elif choose == "Localizações":
     from streamlit_folium import st_folium
 
     dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
+
+    st.title("Localizações dos Estabelecimentos")
 
     m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=9)
 
@@ -171,10 +198,10 @@ elif choose == "Localizações":
     st_data = st_folium(m, width=800)
     #st.write(st_data)
 
-    st.title('Pesquisa de Estabelecimentos')
-
-#PESQUISA ESTABELECIMENTOS
-    name_local = st.text_input('Digite o nome do estabelecimento:')
+#PESQUISA ESTABELECIMENTOS  
+    st.title("Pesquisar estabelecimentos")
+    st.write("Digite o nome do estabelecimento no campo abaixo para obter informações")
+    name_local = st.text_input('Nome do estabelecimento:')
 
     filter_local = df[df['NOME FANT'].str.contains(name_local, case=False)]
 
