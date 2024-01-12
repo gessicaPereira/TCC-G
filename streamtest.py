@@ -10,6 +10,7 @@ import pandas as pd
 import plotly.express as px
 
 
+
 ##AJUSTAR ISSO É O TITULO DA PÁGINA 
 #st.set_page_config(
   #  page_title="Pesquisa de Estabelecimentos",
