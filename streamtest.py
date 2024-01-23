@@ -60,10 +60,10 @@ if choose == "Estabelecimentos":
                                 hovertemplate='CNPJ: %{hovertext}<br>Quantidade: %{y}<extra></extra>'))
 
         fig.update_layout(
-        title='Abertura de estabelecimentos por ano',
+        title='Números Anuais de Novos Estabelecimentos na Cidade',
         xaxis_title='Ano',
         yaxis_title='Quantidade de Estabelecimentos',
-        title_x=0.33,
+        title_x=0.21,
         title_font=dict(size=20),
         width= 750
         )
@@ -83,12 +83,12 @@ if choose == "Estabelecimentos":
         filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
 
     with col2:
-        fig = px.bar(filtered_data, x='DATA STC', y='CNPJ O', title='Inatividade de estabelecimentos por ano')
+        fig = px.bar(filtered_data, x='DATA STC', y='CNPJ O', title='Números Anuais de Estabelecimentos Inativos na Cidade')
 
         fig.update_layout(
         xaxis_title='Ano',
         yaxis_title='Quantidade ',
-        title_x=0.30,
+        title_x=0.21,
         title_font=dict(size=20),
         width=750,
         barmode='stack')
@@ -112,10 +112,10 @@ if choose == "Estabelecimentos":
         fig = px.pie(top_df, values='Frequência', names='Atividade')
 
         fig.update_layout(
-        title=f'As {num_atividades_para_mostrar} atividades econômicas mais presentes',
+        title=f'Cenário Empresarial: As {num_atividades_para_mostrar} Atividades que Dominam a Economia Local',
         height=450,
         title_font=dict(size=20),
-        title_x=0.25,
+        title_x=0.08,
         width=800, 
         legend=dict(
             orientation='h'))
@@ -132,42 +132,112 @@ if choose == "Estabelecimentos":
     with col2:
         top_df_inativas = pd.DataFrame({'Atividade': top_atividades_inativas.index, 'Frequência': top_atividades_inativas.values})
 
-        fig = px.bar_polar(top_df_inativas, r='Frequência', theta='Atividade', labels={'Frequência': 'Contagem'})
-        fig.update_traces(hovertemplate='%{x}: %{r}')
+        fig = px.bar(top_df_inativas, y='Atividade', x='Frequência', labels={'Frequência': 'Contagem'})
+
+        fig.update_traces(hovertemplate='%{y}: %{x}')
         fig.update_layout(
-        title=f'Principais {num_atividades_inativas_para_mostrar} atividades economicas descontinuadas',
-        height=450,
-        title_font=dict(size=20),
-        title_x=0.23,
-        width=800, 
-        legend=dict(
-            orientation='h', 
-            font=dict(size=12)))
+            title=f'Tendências de encerramento: As {num_atividades_inativas_para_mostrar} Atividades Econômicas mais Afetadas na Cidade',
+            height=450,
+            title_x=0.06,
+            title_font=dict(size=20),
+            width=800,
+            legend=dict(orientation='h', font=dict(size=12))
+        )
         st.plotly_chart(fig)
 
     
 #filtro estabelecimentos ativos pela atividade selecionada
-    st.title("PESQUISA POR CNAES")
+    st.markdown("""
+    <style>
+    .font {
+    font-size: 30px !important;
+    margin-top: 60px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<h5 class="font">Encontrando Estabelecimentos por Classificação de Atividades Econômicas (CNAE) 🏢 </h5>', unsafe_allow_html=True)
+
     
-    selected_activity = st.selectbox("SELECIONE A ATIVIDADE:", df['CNAE PRINCP'].unique())
+    selected_activity = st.selectbox("Selecione a atividade:", df['CNAE PRINCP'].unique())
 
     filtered_estabelecimentos = df[df['CNAE PRINCP'] == selected_activity]
 
-    st.subheader(f" {selected_activity}")
+    #st.subheader(f" {selected_activity}")
     
     table_data = filtered_estabelecimentos[['NOME FANT', 'BAIRRO']]
+    table_data.columns = ['Nome do Estabelecimento', 'Bairro']
+    table_data = table_data.reset_index(drop=True)
+    custom_css = """
+        <style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th {
+                border-bottom: 2px solid #dddddd;
+                color: #555555;
+                background-color: #f9f9f9;
+            }
+            th, td {
+                text-align: left;
+                border: none!important;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        </style>
+    """
+    st.markdown(custom_css, unsafe_allow_html=True)
     st.table(table_data)
 
-    st.subheader("Distribuição por Bairro")
+    st.markdown("""
+    <style>
+    .font2 {
+    font-size: 30px !important;
+    margin-top: 60px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<h5 class="font2">Distribuição por Bairro 📊 </h5>', unsafe_allow_html=True)
+
     total_estabelecimentos = len(filtered_estabelecimentos)
-    st.write(f"- Total de Estabelecimentos: {total_estabelecimentos}")
     bairro_counts = filtered_estabelecimentos['BAIRRO'].value_counts()
     bairro_counts_df = pd.DataFrame({'Bairro': bairro_counts.index, 'Contagem': bairro_counts.values})
+    st.write(f" 🔵 Total de Estabelecimentos: {total_estabelecimentos}")
     st.bar_chart(bairro_counts_df.set_index('Bairro'))
 
-    table_data = filtered_estabelecimentos[['NOME FANT', 'BAIRRO']]
+
 
 elif choose == "Localizações":
+
+    #PESQUISA ESTABELECIMENTOS  
+    st.markdown("""
+    <style>
+    .font {
+    font-size: 39px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<h5 class="font">Busca por estabelecimento  </h5>', unsafe_allow_html=True)
+    #st.write("Digite o nome do estabelecimento no campo abaixo para obter informações")
+    name_local = st.text_input(label='Digite o nome do estabelecimento: ', placeholder='Pesquisar                                                                                                                                                                                          🔍')
+    filter_local = df[df['NOME FANT'].str.contains(name_local, case=False)]
+
+    if not filter_local.empty:
+        #st.subheader('Informações do estabelecimento')
+        st.markdown(
+        """
+        <div style='background-color: #F8F9FA; padding: 10px; border-radius: 10px;'>
+            <h5>Informações do estabelecimento 📌 </h5>
+            <p><strong> {}</p></strong>
+            <p><strong>DATA DE INÍCIO DA ATIVIDADE:</strong> {}</p>
+            <p><strong>LOCALIZAÇÃO:</strong> {}</p>
+        </div>
+        """.format(filter_local['NOME FANT'].iloc[0], filter_local['DT IN ATV'].iloc[0], filter_local['LOGRD'].iloc[0]),
+        unsafe_allow_html=True
+    )
+    else:
+        st.error('Nenhum estabelecimento encontrado com esse nome.')
 
 #MAPA
     import folium
@@ -175,7 +245,15 @@ elif choose == "Localizações":
 
     dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
 
-    st.title("Localizações dos Estabelecimentos")
+    st.markdown("""
+    <style>
+    .font {
+    font-size: 30px !important;
+    margin-top: 60px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<h5 class="font">Distribuição dos estabelecimentos na cidade 🗺️ </h5>', unsafe_allow_html=True)
 
     m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=9)
 
@@ -186,27 +264,28 @@ elif choose == "Localizações":
         icon=folium.Icon(icon='home')  
     ).add_to(m)
 
-    st_data = st_folium(m, width=800)
+    st_data = st_folium(m, width=900, height=400)
     #st.write(st_data)
 
-#PESQUISA ESTABELECIMENTOS  
-    st.title("Pesquisar estabelecimentos")
-    st.write("Digite o nome do estabelecimento no campo abaixo para obter informações")
-    name_local = st.text_input('Nome do estabelecimento:')
-
-    filter_local = df[df['NOME FANT'].str.contains(name_local, case=False)]
-
-    if not filter_local.empty:
-        st.subheader('Informações do Estabelecimento')
-        st.write('Nome:', filter_local['NOME FANT'].iloc[0])
-        st.write('Data de Início da Atividade:', filter_local['DT IN ATV'].iloc[0])
-        st.write('Localização:', filter_local['LOGRD'].iloc[0])
-    else:
-        st.error('Nenhum estabelecimento encontrado com esse nome.')
 elif choose == "Sobre":
-    st.title('Aplicação TCC - nome')
-    st.markdown('Aplicação desenvolvida como trabalho de conclusão do curso bacharelado em Sistemas de Informação.')
-    st.markdown('Esaa interface foi desenvolvida com o intuito de auxiliar no processo decisório de novos empreendedores da cidade de Cedro no Ceará, bem como disponibilizar uma visão mais ampla acerca do empreendedorismo local.')
+    col1, col2 = st.columns([2, 2])
+    with col1:
+        st.markdown("""
+        <style>
+        .fontS {
+        font-size: 40px !important;
+        margin-top: 140px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        st.markdown('<h1 class="fontS"> Cedro Localize </h1>', unsafe_allow_html=True)
+
+        st.markdown('Aplicação desenvolvida como trabalho de conclusão do curso bacharelado em Sistemas de Informação do IFCE campus Cedro.')
+        #st.markdown('Esaa interface foi desenvolvida com o intuito de auxiliar no processo decisório de novos empreendedores da cidade de Cedro no Ceará, bem como disponibilizar uma visão mais ampla acerca do empreendedorismo local.')
+
+    with col2:    
+        url_img = "1111.jpg"
+        st.image(url_img, width=520)
 
 
 
