@@ -1,493 +1,563 @@
 import streamlit as st
-import pandas as pd 
-from plotly import graph_objs as go
-
-from streamlit_option_menu import option_menu
-##import cv2
 import pandas as pd
-#from st_aggrid import AgGrid
+from plotly import graph_objs as go
 import plotly.express as px
+from streamlit_option_menu import option_menu
+import folium
+from streamlit_folium import st_folium
+from folium.plugins import MarkerCluster
 
-
-
-##AJUSTAR ISSO É O TITULO DA PÁGINA 
+# --- Configurações Iniciais da Página ---
 st.set_page_config(
     page_title="Cedro Localize",
     page_icon="🏢",
     layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 
-df = pd.read_csv('estabcnaeok.csv')
-df_inativas = pd.read_csv('estab_inativos_ok.csv')
-
-
-#MENU QUE PRECISA DE AJUSTE
-with st.sidebar:
-    choose = option_menu("Menu", ["Sobre", "Estabelecimentos", "Localizações"],
-                         icons=['house', 'shop', 'pin'],
-                         menu_icon="app-indicator", default_index=0,
-                         styles={
-        "container": {"padding": "5!important", "background-color": "#fafafa"},
-        "icon": {"color": "orange", "font-size": "25px"}, 
-        "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
-        "nav-link-selected": {"background-color": "blue"},
+# --- CSS Global para Estilização da Interface ---
+st.markdown("""
+<style>
+    /* Estilo geral */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        background-color: #f0f2f6; /* Fundo mais claro e suave para o dashboard */
     }
-    )
 
-#logo = Image.open(r'C:\Users\08897\TCC\BASECOMPLETA\gatoum.jpg')
-#profile = Image.open(r'C:\Users\08897\TCC\BASECOMPLETA\gatodois.jpg')
-if choose == "Estabelecimentos": 
+    /* Títulos principais da página */
+    h1 {
+        color: #2c3e50; /* Cor mais escura para títulos principais */
+        font-size: 2.5em; /* Tamanho maior para o título da página */
+        margin-bottom: 0.5em;
+    }
+    h2, h3, h4, h5, h6 {
+        color: #2c3e50;
+    }
 
-    #INICIO DA AMOSTRAGEM DE ESTABELECIMENTOS ATIVOS ATUALMENTE  
-    # Contar a quantidade total de estabelecimentos
-    quantidade_estabelecimentos = df.shape[0]
+    /* Sidebar */
+    .css-1d391kg, .css-1dp5vir { /* Classes do Streamlit para a sidebar */
+        background-color: #f0f2f6; /* Fundo branco para sidebar */
+        padding: 10px;
+        border-right: 1px solid #e0e4eb;
+    }
+    .st-emotion-cache-1kyx2bd, .st-emotion-cache-1wivc8r { /* Título do menu na sidebar */
+        color: #2c3e50;
+    }
 
-    # HTML e CSS para criar o círculo com número dentro
-    st.markdown(
-    f"""
-    <div style="
+    /* Ajuste para o número grande de estabelecimentos (Card de Métrica) */
+    .big-number-container {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        background-color: transparent;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    ">
-        <div style="text-align: center;">
-            <p style="margin: 0; font-size: 48px; font-weight: bold; color: #FF4500;">{quantidade_estabelecimentos}</p>
-            <h3 style="margin: 0; font-size: 24px; color: #FF4500;">Estabelecimentos Ativos em 2025</h3>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
+        justify-content: center;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para o card */
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .big-number {
+        font-size: 60px; /* Aumenta o tamanho do número */
+        font-weight: bold;
+        color: #4A90E2; /* Cor primária para o número */
+        margin-bottom: 5px;
+    }
+    .big-number-label {
+        font-size: 24px;
+        color: #555;
+    }
+
+    /* Estilo para os cards de métricas (st.info, st.warning, st.success) */
+    .stAlert {
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .stAlert > div > svg { /* Ícones dentro dos alerts */
+        color: #ffffff !important; /* Força a cor branca para os ícones */
+    }
+    .stAlert.info { background-color: #4A90E2; color: white; } /* Azul para info */
+    .stAlert.info strong { color: white; }
+    .stAlert.warning { background-color: #f7b731; color: white; } /* Laranja para warning */
+    .stAlert.warning strong { color: white; }
+    .stAlert.success { background-color: #2ecc71; color: white; } /* Verde para success */
+    .stAlert.success strong { color: white; }
+    .stAlert p { margin-bottom: 5px; } /* Ajusta o espaçamento interno dos alerts */
+
+    /* Estilo para tabelas de dados (st.dataframe) */
+    .stDataFrame {
+        border-radius: 8px;
+        overflow: hidden; /* Garante que a borda arredondada funcione */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Estilo para caixas de informações (nos detalhes do estabelecimento na busca) */
+    .info-box {
+        background-color: #e0e4eb; /* Fundo suave para a caixa de info */
+        padding: 15px;
+        border-left: 5px solid #4A90E2; /* Uma borda colorida para destaque */
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .info-box p {
+        margin: 5px 0;
+    }
+
+    /* Ajuste para o estilo do expander */
+    .streamlit-expanderHeader {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .streamlit-expanderContent {
+        background-color: #f8f9fa;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        padding: 15px;
+    }
+
+    /* Ajuste para o seletor de caixa */
+    .stSelectbox div[data-baseweb="select"] {
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .css-1dp5vir .menu-list ul li a svg {
+        fill: #4A90E2 !important; 
+    }
+    /* Cor do ícone quando selecionado (Branco) */
+    .css-1dp5vir .menu-list ul li .nav-link-selected svg {
+        fill: white !important;
+    }
+    .st-emotion-cache-1wivc8r { /* Título do menu na sidebar */
+        margin-top: -10px; /* Reduz a margem superior do título "Menu de Navegação" */
+        margin-bottom: 5px; /* Ajusta a margem inferior do título */
+    }
+        /* NOVO: Reduz o padding superior da sidebar */
+    /* Aponta para a div pai que contém todo o conteúdo da sidebar */
+    .st-emotion-cache-vk33c6, .st-emotion-cache-1d391kg { /* Classes que podem controlar o padding da sidebar */
+        padding-top: 0rem; /* Remove o padding superior */
+    }
+
+    /* NOVO: Ajusta a margem superior da div principal dentro da sidebar */
+    /* Aponta para a div que engloba a imagem e o menu */
+    .st-emotion-cache-16txt4v { /* Classe que envolve a imagem e o menu */
+        margin-top: -40px; /* Puxa para cima, ajuste este valor se necessário */
+    }
+
+
+</style>
+""", unsafe_allow_html=True)
+
+# --- Carregamento de Dados ---
+# Substitua por seus caminhos reais dos arquivos CSV
+try:
+    df = pd.read_csv('estabcnaeok.csv')
+    df_inativas = pd.read_csv('estab_inativos_ok.csv')
+    dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
+except FileNotFoundError:
+    st.error("Erro: Verifique se os arquivos CSV ('estabcnaeok.csv', 'estab_inativos_ok.csv', 'estabGeolocalizadoOK.csv') estão no mesmo diretório da aplicação.")
+    st.stop()
+
+# Conversão de colunas de data para datetime
+df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')
+df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')
+# Garantir que as colunas de Latitude e Longitude são numéricas no dfloc
+dfloc['Latitude'] = pd.to_numeric(dfloc['Latitude'], errors='coerce')
+dfloc['Longitude'] = pd.to_numeric(dfloc['Longitude'], errors='coerce')
+dfloc.dropna(subset=['Latitude', 'Longitude'], inplace=True)
+
+# --- Sidebar com Option Menu ---
+# --- Sidebar com Option Menu Corrigido ---
+with st.sidebar:
+    # 1. IMAGEM: Fica no topo como o logo.
+    # 1. IMAGEM: Fica no topo como o logo.
+    
+    # Cria três colunas na sidebar.
+    # [1] e [3] são colunas vazias para empurrar a logo para o centro.
+    # [1] é a coluna onde o logo será inserido e tem a largura que você quer (100px).
+    col_esq, col_logo, col_dir = st.columns([3, 4, 1]) 
+    # A proporção [1, 4, 1] é uma boa estimativa visual. Se a sidebar tem 300px, a coluna do meio terá 200px.
+    # Se você quer a imagem menor, use, por exemplo: [2, 2, 2]. 
+    # Para o seu caso, vamos tentar uma proporção mais compacta.
+
+    col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 6, 2]) 
+    # Proporção [3, 4, 3] fará com que a imagem ocupe menos da metade da largura da sidebar.
+
+    with col_logo:
+        # Usamos use_container_width=True dentro da pequena coluna (col_logo),
+        # limitando assim o tamanho máximo da imagem à largura dessa coluna (cerca de 40% da sidebar).
+        st.image("logo2.png", use_container_width=True)
+    
+    # 3. MENU: O título foi removido (None), e ajustamos os estilos.
+    # 3. MENU: O título foi removido (None), e ajustamos os estilos.
+    choose = option_menu(
+        menu_title="Menu de Navegação",
+        options=["Sobre", "Estabelecimentos", "Localizações"],
+        icons=['house-door-fill', 'building-fill', 'geo-alt-fill'],
+        default_index=0,    
+        styles={
+            # Container do menu
+            "container": {
+                "padding": "0!important", 
+                "background-color": "#ffffff", 
+                "border-radius": "8px"
+            },
+            # Ícone (removendo a cor global para tratar nos links)
+            "icon": {
+                "font-size": "18px",
+                "margin-right": "10px"
+            },
+            # Links/Itens do menu (estado NORMAL)
+            "nav-link": {
+                "font-size": "16px",
+                "text-align": "left",
+                "margin":"5px 0px",
+                "padding": "10px 15px",
+                "--hover-color": "#e0e4eb",
+                "border-radius": "5px",
+                "color": "#333333" 
+                # Defina o ícone azul (cor normal) AQUI:
+                # Seleciona o ícone SVG dentro do link
+            },
+            # Link selecionado (estado ATIVO/AZUL)
+            "nav-link-selected": {
+                "background-color": "#4A90E2", 
+                "color": "white",
+                "font-weight": "600",
+                # Defina o ícone BRANCO (cor selecionada) AQUI:
+            },
+            
+        }
     )
 
+# --- Conteúdo das Páginas ---
+if choose == "Estabelecimentos":
+    st.title("📊 Painel de Estabelecimentos")
+    st.markdown("---")
 
+    # --- Cards de Métricas ---
+    st.markdown("### Visão Geral dos Estabelecimentos")
+    col1, col2, col3 = st.columns(3)
 
-    col1, col2 = st.columns([0.4, 2])
+    with col1:
+        st.info(f"**Total de Estabelecimentos Ativos**\n\n# {df.shape[0]}", icon="✅")
+    with col2:
+        st.warning(f"**Total de Estabelecimentos Inativos**\n\n# {df_inativas.shape[0]}", icon="❌")
+    with col3:
+        if not df.empty:
+            ano_mais_aberturas = df['DATA STC'].dt.year.value_counts().idxmax()
+            st.success(f"**Ano com Mais Aberturas**\n\n# {ano_mais_aberturas}", icon="📈")
+        else:
+            st.success(f"**Ano com Mais Aberturas**\n\n# N/A", icon="📈")
+
+    st.markdown("---")
+
+    # --- Gráficos de Tendência (Ativos e Inativos) ---
+    st.markdown("### Dinâmica de Abertura e Encerramento ao Longo do Tempo")
+    col_graph1, col_graph2 = st.columns(2)
+
+    with col_graph1:
+        st.subheader("Estabelecimentos Ativos por Ano")
+        contagem_anos_ativos = df.groupby(df['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
+        contagem_anos_ativos.columns = ['Ano', 'Quantidade']
+        
+        min_year_ativos = int(contagem_anos_ativos['Ano'].min()) if not contagem_anos_ativos.empty else 2000
+        max_year_ativos = int(contagem_anos_ativos['Ano'].max()) if not contagem_anos_ativos.empty else 2025
+        selected_years_ativos = st.slider(
+            "Selecione o intervalo de anos (Ativos)",
+            min_year_ativos,
+            max_year_ativos,
+            (min_year_ativos, max_year_ativos),
+            key="slider_ativos"
+        )
+        filtered_data_ativos = contagem_anos_ativos[(contagem_anos_ativos['Ano'] >= selected_years_ativos[0]) &
+                                                    (contagem_anos_ativos['Ano'] <= selected_years_ativos[1])]
+        
+        if not filtered_data_ativos.empty:
+            fig_ativos = px.bar(filtered_data_ativos, x='Ano', y='Quantidade',
+                     labels={'Quantidade': 'Quantidade de Estabelecimentos', 'Ano': 'Ano'},
+                     text='Quantidade',
+                     title='Estabelecimentos Ativos por Ano',  # Adicione esta linha
+                     color_discrete_sequence=px.colors.qualitative.Plotly,
+                     template='plotly_white')
+            fig_ativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+            fig_ativos.update_traces(texttemplate='%{text}', textposition='outside')
+            st.plotly_chart(fig_ativos, use_container_width=True)
+        else:
+            st.info("Não há dados de estabelecimentos ativos para o período selecionado.")
+
+    with col_graph2:
+        st.subheader("Estabelecimentos Inativos por Ano")
+        contagem_anos_inativos = df_inativas.groupby(df_inativas['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
+        contagem_anos_inativos.columns = ['Ano', 'Quantidade']
+
+        min_year_inativos = int(contagem_anos_inativos['Ano'].min()) if not contagem_anos_inativos.empty else 2000
+        max_year_inativos = int(contagem_anos_inativos['Ano'].max()) if not contagem_anos_inativos.empty else 2025
+        selected_years_inativos = st.slider(
+            "Selecione o intervalo de anos (Inativos)",
+            min_year_inativos,
+            max_year_inativos,
+            (min_year_inativos, max_year_inativos),
+            key="slider_inativos"
+        )
+        filtered_data_inativos = contagem_anos_inativos[(contagem_anos_inativos['Ano'] >= selected_years_inativos[0]) &
+                                                         (contagem_anos_inativos['Ano'] <= selected_years_inativos[1])]
+        
+        if not filtered_data_inativos.empty:
+            fig_inativos = px.bar(filtered_data_inativos, x='Ano', y='Quantidade',
+                                  labels={'Quantidade': 'Quantidade de Encerramentos', 'Ano': 'Ano'},
+                                  text='Quantidade',
+                                  title='Estabelecimentos Ativos por Ano',  # Adicione esta linha
+                                  color_discrete_sequence=px.colors.qualitative.Pastel,
+                                  template='plotly_white')
+            fig_inativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+            fig_inativos.update_traces(texttemplate='%{text}', textposition='outside')
+            st.plotly_chart(fig_inativos, use_container_width=True)
+        else:
+            st.info("Não há dados de estabelecimentos inativos para o período selecionado.")
+
+    st.markdown("---")
+
+    # --- Análise por Atividade Econômica (Ativas e Inativas) ---
+    st.markdown("### Análise por Classificação de Atividades Econômicas (CNAE)")
     
-    # INICIO GRÁFICO 1 - COM FILTRO E GRÁFICO AJUSTADO
-    df['DATA STC'] = pd.to_datetime(df['DATA STC'])
+    # Gráfico de Atividades Econômicas Ativas
+    st.subheader("Top Atividades Econômicas Ativas")
+    num_atividades_para_mostrar = st.slider("Selecione o número de atividades ", 3, 15, 5, key="top_ativos_slider")
+    contagem_atividades = df['CNAE PRINCP'].value_counts()
+    top_atividades = contagem_atividades.nlargest(num_atividades_para_mostrar).reset_index()
+    top_atividades.columns = ['Atividade', 'Frequência']
 
-    # AQUI EU VOU ACESSAR A PROPIEDADE ANO DA DATA DE SITUAÇÃO CADASTRAL PARA AGRUPAR E CONTAR A PARTIR DO 
-    # CNPJ O QUANTOS CNPJS CORRESPONDEM AQUELE ANO 
-    # A VARIAVEL ARMAZENA OS ANOS COMO INDICE E A CONTAGEM DOS ESTABELECIMENTOS COM OS VALORES CORRESPONDENTES
-
-    # Filtragem por intervalo de anos
-    contagem_anos = df.groupby(df['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
-
-    # Estilo centralizador (caso use para outros elementos)
-    st.markdown("""
-    <style>
-        .center-container-g2 {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Usar colunas para centralizar slider e gráfico
-    col1, col2, col3 = st.columns([1, 4, 1])
-
-    with col2:
-        # Controle do filtro de intervalo de anos
-        selected_years = st.slider(
-            "Selecione o intervalo de anos",
-            int(contagem_anos['DATA STC'].min()),
-            int(contagem_anos['DATA STC'].max()),
-            (int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max()))
+    fig_pie = px.pie(top_atividades, values='Frequência', names='Atividade',
+                     title=f'As {num_atividades_para_mostrar} Atividades que Dominam a Economia Local',
+                     hole=0.3, 
+                     color_discrete_sequence=px.colors.qualitative.Light24) 
+    fig_pie.update_layout(
+        height=550, 
+        title_x=0, 
+        showlegend=True,
+        plot_bgcolor='rgba(0,0,0,0)', 
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=50, b=100, l=0, r=0), 
+        legend=dict(
+            orientation="h", 
+            yanchor="bottom", 
+            y=-0.3,
+            xanchor="center", 
+            x=0.5,
+            font=dict(size=10), 
         )
+    )
+    st.plotly_chart(fig_pie, use_container_width=True)
 
-        # Filtrando os dados
-        filtered_data = contagem_anos[(contagem_anos['DATA STC'] >= selected_years[0]) & (contagem_anos['DATA STC'] <= selected_years[1])]
+    # Lógica da tabela detalhada para atividades ativas
+    if 'show_table_ativos' not in st.session_state:
+        st.session_state.show_table_ativos = False
 
-        # Criação do gráfico de barras verticais
-        fig = px.bar(filtered_data,
-                    x='DATA STC',
-                    y='CNPJ O',
-                    labels={'CNPJ O': 'Quantidade de Estabelecimentos', 'DATA STC': 'Ano'},
-                    title='Quantidade de Estabelecimentos Ativos por Ano',
-                    text='CNPJ O',  # Exibe a quantidade no topo da barra
-                    color='DATA STC',  # Cor das barras de acordo com o ano
-                    color_continuous_scale='Viridis',  # Usando uma escala de cores profissional
-                    template='plotly_dark',  # Usando template escuro para um visual mais moderno
-                    orientation='v')  # Altera para barras verticais
+    if st.button("Ver Tabela Detalhada de Atividades Ativas", key="btn_tabela_ativos_show"):
+        st.session_state.show_table_ativos = True
 
-        # Ajustar a posição do texto e o layout
-        fig.update_traces(texttemplate='%{text}', textposition='outside', marker=dict(line=dict(width=0)))  # Coloca o texto fora da barra
-        fig.update_layout(
-            height=450,
-            width=750,  # Ajuste o tamanho para combinar com o gráfico anterior
-            title_x=0.2,
-            title_font=dict(size=20),
-            showlegend=False,  # Desabilita a legenda para um visual mais clean
-            xaxis_title='Ano',
-            yaxis_title='Quantidade de Estabelecimentos'
-        )
+    if st.session_state.show_table_ativos:
+        st.dataframe(contagem_atividades.reset_index().rename(columns={'index': 'Atividade', 'CNAE PRINCP': 'Atividade'}),
+                      use_container_width=True)
+        if st.button("Fechar Tabela de Atividades Ativas", key="btn_tabela_ativos_hide"):
+            st.session_state.show_table_ativos = False
 
-        # Exibir o gráfico
-        st.plotly_chart(fig)
-    # FIM GRÁFICO 1
+    st.markdown("---") # Separador para o próximo gráfico
 
+    # Gráfico de Atividades Econômicas Encerradas
+    st.subheader("Top Atividades Econômicas Encerradas")
+    num_atividades_inativas_para_mostrar = st.slider("Selecione o número de atividades ", 3, 15, 5, key="top_inativos_slider")
+    contagem_atividades_inativas = df_inativas['CNAE PRINCP'].value_counts()
+    top_atividades_inativas = contagem_atividades_inativas.nlargest(num_atividades_inativas_para_mostrar).reset_index()
+    top_atividades_inativas.columns = ['Atividade', 'Frequência']
 
-# INICIO GRÁFICO INATIVAS - OK - NÃO MEXER MAIS
-    df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'])
-    contagem_anos = df_inativas.groupby(df_inativas['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
+    fig_bar_inativas = px.bar(top_atividades_inativas, x='Frequência', y='Atividade', orientation='h',
+                              title=f'As {num_atividades_inativas_para_mostrar} Atividades mais Encerradas na Cidade',
+                              color='Frequência', color_continuous_scale='Reds',
+                              text='Frequência',
+                              template='plotly_white')
+    fig_bar_inativas.update_layout(
+        height=450, 
+        title_x=0, 
+        plot_bgcolor='rgba(0,0,0,0)', 
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis_title="Quantidade de Encerramentos", 
+        yaxis_title=None,
+        yaxis={'categoryorder':'total ascending'},
+        margin=dict(l=200, r=20, t=50, b=20)
+    )
+    fig_bar_inativas.update_traces(texttemplate='%{x}', textposition='outside')
+    st.plotly_chart(fig_bar_inativas, use_container_width=True)
 
-    # Estilo centralizador (caso use para outros elementos)
-    st.markdown("""
-    <style>
-        .center-container-g2 {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    # Lógica da tabela detalhada para atividades inativas
+    if 'show_table_inativas' not in st.session_state:
+        st.session_state.show_table_inativas = False
 
-    # Usar colunas para centralizar slider e gráfico
-    col1, col2, col3 = st.columns([1, 4, 1])
+    if st.button("Ver Tabela Detalhada de Atividades Encerradas", key="btn_tabela_inativas_show"):
+        st.session_state.show_table_inativas = True
 
-    with col2:
-        selected_years = st.slider(
-            "Selecione o intervalo de anos",
-            int(contagem_anos['DATA STC'].min()),
-            int(contagem_anos['DATA STC'].max()),
-            (int(contagem_anos['DATA STC'].min()), int(contagem_anos['DATA STC'].max()))
-        )
+    if st.session_state.show_table_inativas:
+        st.dataframe(contagem_atividades_inativas.reset_index().rename(columns={'index': 'Atividade', 'CNAE PRINCP': 'Atividade'}),
+                      use_container_width=True)
+        if st.button("Fechar Tabela de Atividades Encerradas", key="btn_tabela_inativas_hide"):
+            st.session_state.show_table_inativas = False
 
-        filtered_data = contagem_anos[
-            (contagem_anos['DATA STC'] >= selected_years[0]) &
-            (contagem_anos['DATA STC'] <= selected_years[1])
-        ]
+    st.markdown("---")
 
-        fig = px.bar(
-            filtered_data,
-            x='DATA STC',
-            y='CNPJ O',
-            title='Números Anuais de Estabelecimentos Inativos na Cidade'
-        )
-
-        fig.update_layout(
-            xaxis_title='Ano',
-            yaxis_title='Quantidade',
-            title_x=0.2,
-            title_font=dict(size=20),
-            width=750,
-            barmode='stack'
-        )
-
-        st.plotly_chart(fig)
-    # FIM GRÁFICO 1
-
-
-    # INICIO GRAFICO 2 - OK COM O FILTRO
-    col1, col2 = st.columns([1, 4])  # Ajustei a proporção das colunas para centralizar
-    with col2:
-        contagem_atividades = df['CNAE PRINCP'].value_counts()
-
-        # Número fixo de atividades no gráfico
-        num_atividades_para_mostrar = 5
-        top_atividades = contagem_atividades.nlargest(num_atividades_para_mostrar)
-        outras_atividades = contagem_atividades.iloc[num_atividades_para_mostrar:]
-
-        # Criar DataFrame para as 5 principais atividades
-        top_df = pd.DataFrame({'Atividade': top_atividades.index, 'Frequência': top_atividades.values})
-
-        # Criar gráfico de pizza para as 5 principais atividades
-        fig = px.pie(top_df, values='Frequência', names='Atividade')
-
-        fig.update_layout(
-            title=f'Cenário Empresarial: As {num_atividades_para_mostrar} Atividades que Dominam a Economia Local',
-            height=450,
-            title_font=dict(size=20),
-            title_x=0.08,
-            width=800,
-            legend=dict(orientation='h')
-        )
-
-        # Exibir gráfico no Streamlit
-        st.plotly_chart(fig)
-
-        # Controle de exibição da tabela
-        if "mostrar_tabela" not in st.session_state:
-            st.session_state.mostrar_tabela = False
-
-        # Botão para "Ver outras atividades" (só aparece se a tabela não estiver visível)
-        if not st.session_state.mostrar_tabela:
-            if st.button("Ver outras atividades"):
-                st.session_state.mostrar_tabela = True
-
-        # Exibição condicional da tabela
-        if st.session_state.mostrar_tabela:
-            outras_df = pd.DataFrame({
-                'Posição': range(num_atividades_para_mostrar + 1, num_atividades_para_mostrar + len(outras_atividades) + 1),
-                'Atividade': outras_atividades.index,
-                'Frequência': outras_atividades.values
-            })
-
-            st.markdown("### Outras Atividades Empresariais")
-
-            # Exibir tabela com rolagem para melhorar a navegação
-            st.dataframe(outras_df, height=300)  # A altura pode ser ajustada conforme necessário
-
-            # Botão para "Fechar tabela" abaixo da tabela
-            if st.button("Fechar tabela"):
-                st.session_state.mostrar_tabela = False
-                st.experimental_rerun()
-
-    # INICIO GRAFICO 3 - inativos - OK COM O FILTRO
-    col1, col2 = st.columns([1, 4])  # Ajustei a proporção das colunas para centralizar
-    with col2:
-        contagem_atividades_inativas = df_inativas['CNAE PRINCP'].value_counts()
-
-        # Número fixo de atividades para mostrar no gráfico
-        num_atividades_inativas_para_mostrar = 5  # Sempre exibir as 5 principais
-        top_atividades_inativas = contagem_atividades_inativas.nlargest(num_atividades_inativas_para_mostrar)
-
-        # Criar DataFrame com as atividades inativas mais frequentes
-        top_df_inativas = pd.DataFrame({'Atividade': top_atividades_inativas.index, 'Frequência': top_atividades_inativas.values})
-        top_df_inativas['Atividade'] = top_df_inativas['Atividade'].replace(
-            {'Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - minimercados, mercearias e armazéns':'Comércio varejista de produtos alimentícios - minimercados e mercearias'}
-        )
-
-        # Criar gráfico de barras horizontais
-        fig = px.bar(
-            top_df_inativas, 
-            x='Frequência', 
-            y='Atividade', 
-            orientation='h',
-            labels={'Frequência': 'Encerramentos', 'Atividade': 'Atividade Econômica'},
-            color='Frequência', 
-            color_continuous_scale='reds',  # Gradiente de vermelho
-            text='Frequência'  
-        )
-
-        # Configurações do gráfico
-        fig.update_traces(hovertemplate='%{y}: %{x}')
-        fig.update_layout(
-            title=f'Tendências Econômicas: As {num_atividades_inativas_para_mostrar} Atividades mais Encerradas na Cidade',
-            height=450,
-            title_x=0.1,
-            title_font=dict(size=20),
-            width=800,
-            coloraxis_colorbar=dict(title="Encerramentos"),
-            xaxis_title="Quantidade de Encerramentos",
-            yaxis_title=None,
-            margin=dict(l=200) 
-        )
-
-        # Exibir gráfico
-        st.plotly_chart(fig)
-
-        # Controle de exibição da tabela
-        if "mostrar_tabela_inativas" not in st.session_state:
-            st.session_state.mostrar_tabela_inativas = False
-
-        # Botão para "Ver outras atividades inativas"
-        if not st.session_state.mostrar_tabela_inativas:
-            if st.button("Ver outras atividades inativas"):
-                st.session_state.mostrar_tabela_inativas = True
-
-        # Exibição condicional da tabela
-        if st.session_state.mostrar_tabela_inativas:
-            outras_atividades_inativas = contagem_atividades_inativas.iloc[num_atividades_inativas_para_mostrar:]
-            outras_df_inativas = pd.DataFrame({
-                'Posição': range(num_atividades_inativas_para_mostrar + 1, num_atividades_inativas_para_mostrar + len(outras_atividades_inativas) + 1),
-                'Atividade': outras_atividades_inativas.index,
-                'Frequência': outras_atividades_inativas.values
-            })
-
-            st.markdown("### Outras Atividades Econômicas Inativas")
-
-            # Exibir tabela com rolagem
-            st.dataframe(outras_df_inativas, height=300)
-
-            # Botão para "Fechar tabela inativas" abaixo da tabela
-            if st.button("Fechar tabela inativas"):
-                st.session_state.mostrar_tabela_inativas = False
-                st.experimental_rerun()
-
+    # --- Busca e Filtragem de Estabelecimentos por Atividade ---
+    st.markdown("### Encontrando Estabelecimentos por Atividade Econômica")
     
-    # Filtro estabelecimentos ativos pela atividade selecionada
-    st.markdown("""
-    <style>
-    .font {
-        font-size: 30px !important;
-        margin-top: 60px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown('<h5 class="font">Encontrando Estabelecimentos por Classificação de Atividades Econômicas (CNAE) 🏢 </h5>', unsafe_allow_html=True)
+    selected_activity_filter = st.selectbox(
+        "Selecione a atividade para filtrar estabelecimentos:",
+        options=['Todas'] + sorted(df['CNAE PRINCP'].unique().tolist()),
+        key="select_activity_filter"
+    )
 
-    st.markdown("""
-    <style>
-        .center-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    if selected_activity_filter == 'Todas':
+        filtered_estabelecimentos = df
+    else:
+        filtered_estabelecimentos = df[df['CNAE PRINCP'] == selected_activity_filter]
 
-    # Criar o container centralizado
-    st.markdown('<div class="center-container">', unsafe_allow_html=True)
+    st.info(f"🔵 **Total de Estabelecimentos encontrados:** {len(filtered_estabelecimentos)}")
 
-    selected_activity = st.selectbox("Selecione a atividade:", df['CNAE PRINCP'].unique())
+    st.dataframe(filtered_estabelecimentos[['NOME FANT', 'BAIRRO', 'LOGRD', 'DT IN ATV', 'CNAE PRINCP']].rename(columns={
+        'NOME FANT': 'Nome do Estabelecimento',
+        'BAIRRO': 'Bairro',
+        'LOGRD': 'Endereço',
+        'DT IN ATV': 'Data de Início',
+        'CNAE PRINCP': 'CNAE Principal'
+    }), use_container_width=True, height=350)
 
-    filtered_estabelecimentos = df[df['CNAE PRINCP'] == selected_activity]
-
-    # Tabela de estabelecimentos filtrados
-    table_data = filtered_estabelecimentos[['NOME FANT', 'BAIRRO']]
-    table_data.columns = ['Nome do Estabelecimento', 'Bairro']
-    table_data = table_data.reset_index(drop=True)
-
-    # Estilo da tabela
-    custom_css = """
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-            th {
-                border-bottom: 2px solid #dddddd;
-                color: #555555;
-                background-color: #f9f9f9;
-            }
-            th, td {
-                text-align: left;
-                border: none!important;
-            }
-            tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-        </style>
-    """
-    st.markdown(custom_css, unsafe_allow_html=True)
-    st.table(table_data)
-
-    # Adicionar título para o gráfico de distribuição por bairro
-    st.markdown("""
-    <style>
-    .font2 {
-        font-size: 30px !important;
-        margin-top: 60px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown('<h5 class="font2">Distribuição por Bairro 📊 </h5>', unsafe_allow_html=True)
-
-    # Calcular a distribuição por bairro
-    total_estabelecimentos = len(filtered_estabelecimentos)
-    bairro_counts = filtered_estabelecimentos['BAIRRO'].value_counts()
-    bairro_counts_df = pd.DataFrame({'Bairro': bairro_counts.index, 'Contagem': bairro_counts.values})
-    st.write(f" 🔵 Total de Estabelecimentos: {total_estabelecimentos}")
-
-    # Criar gráfico de barras para distribuição por bairro
-    st.bar_chart(bairro_counts_df.set_index('Bairro'))
-
-
+    if not filtered_estabelecimentos.empty:
+        st.subheader(f"Distribuição de Estabelecimentos por Bairro (Atividade: {selected_activity_filter})")
+        bairro_counts = filtered_estabelecimentos['BAIRRO'].value_counts().reset_index()
+        bairro_counts.columns = ['Bairro', 'Contagem']
+        
+        fig_bairro = px.bar(bairro_counts, x='Bairro', y='Contagem',
+                            title='Distribuição por Bairro da Atividade Selecionada',
+                            color_discrete_sequence=px.colors.qualitative.Vivid,
+                            template='plotly_white')
+        fig_bairro.update_layout(height=400, title_x=0.5, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_bairro, use_container_width=True)
+    else:
+        st.info("Nenhum estabelecimento encontrado para a atividade selecionada para mostrar a distribuição por bairro.")
 
 
 elif choose == "Localizações":
+    st.title("📍 Localização de Estabelecimentos")
+    st.markdown("---")
 
-    #PESQUISA ESTABELECIMENTOS  
-    st.markdown("""
-    <style>
-    .font {
-    font-size: 39px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown('<h5 class="font">Busca por estabelecimento  </h5>', unsafe_allow_html=True)
-    #st.write("Digite o nome do estabelecimento no campo abaixo para obter informações")
-    name_local = st.text_input(label='Digite o nome do estabelecimento: ', placeholder='Pesquisar                                                                                                                                                                                          🔍')
-    filter_local = df[df['NOME FANT'].str.contains(name_local, case=False)]
+    # --- Busca por Estabelecimento Específico ---
+    st.markdown("### Busca Detalhada por Estabelecimento")
+    name_local = st.text_input(label='Digite o nome do estabelecimento para buscar:',
+                               placeholder='Ex: Mercadinho Boa Esperança',
+                               key="search_input_local")
 
-    if not filter_local.empty:
-        #st.subheader('Informações do estabelecimento')
-        st.markdown(
-        """
-        <div style='background-color: #F8F9FA; padding: 10px; border-radius: 10px;'>
-            <h5>Informações do estabelecimento 📌 </h5>
-            <p><strong> {}</p></strong>
-            <p><strong>DATA DE INÍCIO DA ATIVIDADE:</strong> {}</p>
-            <p><strong>LOCALIZAÇÃO:</strong> {}</p>
-        </div>
-        """.format(filter_local['NOME FANT'].iloc[0], filter_local['DT IN ATV'].iloc[0], filter_local['LOGRD'].iloc[0]),
-        unsafe_allow_html=True
-    )
+    if name_local:
+        filter_local = df[df['NOME FANT'].str.contains(name_local, case=False, na=False)]
+        
+        if not filter_local.empty:
+            st.markdown("#### Resultados da Busca:")
+            for i, row in filter_local.iterrows():
+                with st.expander(f"Detalhes de {row['NOME FANT']}"):
+                    st.markdown(f"""
+                        <div class="info-box">
+                            <p><strong>Nome Fantasia:</strong> {row['NOME FANT']}</p>
+                            <p><strong>CNPJ:</strong> {row['CNPJ B']}</p>
+                            <p><strong>Data de Início da Atividade:</strong> {row['DT IN ATV']}</p>
+                            <p><strong>Endereço:</strong> {row['LOGRD']}, {row['NUMERO']} - {row['BAIRRO']}, {row['MUNICIPIO']}</p>
+                            <p><strong>CEP:</strong> {row['CEP']}</p>
+                            <p><strong>CNAE Principal:</strong> {row['CNAE PRINCP']}</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.error('Nenhum estabelecimento encontrado com esse nome.')
     else:
-        st.error('Nenhum estabelecimento encontrado com esse nome.')
+        st.info("Digite um nome no campo acima para buscar informações sobre estabelecimentos e seus detalhes.")
 
-#MAPA
-    import folium
-    from streamlit_folium import st_folium
+    st.markdown("---")
+        # --- Mapa de Distribuição dos Estabelecimentos ---
+    st.markdown("### Distribuição Geográfica dos Estabelecimentos")
+    st.markdown("Visualize a dispersão geográfica de todos os estabelecimentos geolocalizados na cidade.")
 
-    dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
+# Verifica se o DataFrame não está vazio
+    if not dfloc.empty:
+    # Filtra apenas coordenadas dentro dos limites do Brasil
+        dfloc_brasil = dfloc[
+        (dfloc['Latitude'].between(-35.0, 5.0)) &
+        (dfloc['Longitude'].between(-75.0, -30.0))
+        ]
 
-    st.markdown("""
-    <style>
-    .font {
-    font-size: 30px !important;
-    margin-top: 60px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown('<h5 class="font">Distribuição dos estabelecimentos na cidade 🗺️ </h5>', unsafe_allow_html=True)
+    if not dfloc_brasil.empty:
+        # Calcula os limites e centro
+        min_lat = dfloc_brasil['Latitude'].min()
+        max_lat = dfloc_brasil['Latitude'].max()
+        min_lon = dfloc_brasil['Longitude'].min()
+        max_lon = dfloc_brasil['Longitude'].max()
 
-    m = folium.Map(location=[dfloc['Latitude'].mean(), dfloc['Longitude'].mean()], zoom_start=9)
+        center_lat = dfloc_brasil['Latitude'].mean()
+        center_lon = dfloc_brasil['Longitude'].mean()
 
-    for index, row in dfloc.iterrows():
-        folium.Marker(
-        location=[row['Latitude'], row['Longitude']],
-        popup=row['NOME FANT'],  
-        icon=folium.Icon(icon='home')  
-    ).add_to(m)
+        # Cria o mapa centralizado
+        m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
+        marker_cluster = MarkerCluster().add_to(m)
 
-    st_data = st_folium(m, width=900, height=400)
-    #st.write(st_data)
+        # Adiciona os marcadores ao mapa
+        for index, row in dfloc_brasil.iterrows():
+            if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
+                folium.Marker(
+                    location=[row['Latitude'], row['Longitude']],
+                    popup=f"**{row['NOME FANT']}**<br>Bairro: {row['BAIRRO']}",
+                    tooltip=row['NOME FANT'],
+                    icon=folium.Icon(color='blue', icon='info-sign')
+                ).add_to(marker_cluster)
+
+        # Ajusta o mapa para os limites dos pontos
+        m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]], padding=(5, 5))
+
+        # Mostra o mapa no Streamlit
+        st_data = st_folium(m, width=900, height=500)
+
+    else:
+        st.warning("Nenhum ponto com coordenadas válidas no Brasil foi encontrado.")
+
 
 elif choose == "Sobre":
-    col1, col2 = st.columns([2, 2])
-    with col1:
+    st.title("💡 Sobre o Cedro Localize")
+    st.markdown("---")
+    col_about1, col_about2 = st.columns([1, 1])
+
+    with col_about1:
         st.markdown("""
-        <style>
-        .fontS {
-        font-size: 40px !important;
-        margin-top: 140px;
-        }
-        </style>
+        O **Cedro Localize** é uma aplicação desenvolvida como **Trabalho de Conclusão de Curso (TCC)**
+        do bacharelado em Sistemas de Informação do **Instituto Federal do Ceará (IFCE), campus Cedro**.
+
+        Nosso principal objetivo é fornecer uma **ferramenta analítica e interativa** para
+        **empreendedores, pesquisadores e gestores públicos** na cidade de Cedro, Ceará.
+        Através da visualização e análise de dados sobre estabelecimentos comerciais,
+        o Cedro Localize busca:
+
+        * **Auxiliar no processo decisório** de novos negócios, investimentos e expansões.
+        * Proporcionar uma **visão ampla e detalhada** sobre o cenário empreendedor local.
+        * Identificar **tendências de mercado**, como atividades em crescimento ou declínio.
+        * Mapear a **distribuição geográfica** dos estabelecimentos, auxiliando na logística e planejamento urbano.
+
+        Acreditamos que, ao democratizar o acesso a informações relevantes sobre o ecossistema empresarial de Cedro,
+        podemos contribuir significativamente para o **desenvolvimento econômico** e a **inovação** em nossa comunidade.
+        """)
+    with col_about2:
+        st.image("1111.jpg",
+                  caption="Uma visão detalhada do cenário empresarial de Cedro, CE.",
+                  use_container_width=True)
+        st.markdown("""
+            **Desenvolvido por:** Géssica Pereira da Silva
+            <br>
+            **Instituição:** IFCE Campus Cedro
         """, unsafe_allow_html=True)
-        st.markdown('<h1 class="fontS"> Cedro Localize </h1>', unsafe_allow_html=True)
-
-        st.markdown('Aplicação desenvolvida como trabalho de conclusão do curso bacharelado em Sistemas de Informação do IFCE campus Cedro.')
-        #st.markdown('Esaa interface foi desenvolvida com o intuito de auxiliar no processo decisório de novos empreendedores da cidade de Cedro no Ceará, bem como disponibilizar uma visão mais ampla acerca do empreendedorismo local.')
-
-    with col2:    
-        url_img = "1111.jpg"
-        st.image(url_img, width=520)
-
-
-
-
-
-#teste pro grafico das localizações
-#import folium
-import folium
-from streamlit_folium import st_folium
-
-# center on Liberty Bell, add marker
-#m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-#folium.Marker(
-#    [39.949610, -75.150282], popup="Liberty Bell", tooltip="Liberty Bell"
-#).add_to(m)
-
-# call to render Folium map in Streamlit
-#st_data = st_folium(m, width=725)
