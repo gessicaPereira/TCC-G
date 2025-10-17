@@ -425,7 +425,7 @@ if choose == "Estabelecimentos":
                             title='Distribuição por Bairro da Atividade Selecionada',
                             color_discrete_sequence=px.colors.qualitative.Vivid,
                             template='plotly_white')
-        fig_bairro.update_layout(height=400, title_x=0.5, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        fig_bairro.update_layout(height=400, title_x=0, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_bairro, use_container_width=True)
     else:
         st.info("Nenhum estabelecimento encontrado para a atividade selecionada para mostrar a distribuição por bairro.")
@@ -534,8 +534,7 @@ elif choose == "Sobre":
         """)
     with col_about2:
         st.image("1111.jpg",
-                  caption="Uma visão detalhada do cenário empresarial de Cedro, CE.",
-                  use_container_width=True)
+                  caption="Uma visão detalhada do cenário empresarial de Cedro, CE.")
         st.markdown("""
             **Desenvolvido por:** Géssica Pereira da Silva
             <br>
