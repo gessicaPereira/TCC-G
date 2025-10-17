@@ -6,6 +6,7 @@ from streamlit_option_menu import option_menu
 import folium
 from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster
+from PIL import Image
 
 # --- Configurações Iniciais da Página ---
 st.set_page_config(
@@ -175,24 +176,23 @@ dfloc.dropna(subset=['Latitude', 'Longitude'], inplace=True)
 # --- Sidebar com Option Menu ---
 # --- Sidebar com Option Menu Corrigido ---
 with st.sidebar:
-    # 1. IMAGEM: Fica no topo como o logo.
-    # 1. IMAGEM: Fica no topo como o logo.
-    
-    # Cria três colunas na sidebar.
-    # [1] e [3] são colunas vazias para empurrar a logo para o centro.
-    # [1] é a coluna onde o logo será inserido e tem a largura que você quer (100px).
-    col_esq, col_logo, col_dir = st.columns([3, 4, 1]) 
-    # A proporção [1, 4, 1] é uma boa estimativa visual. Se a sidebar tem 300px, a coluna do meio terá 200px.
-    # Se você quer a imagem menor, use, por exemplo: [2, 2, 2]. 
-    # Para o seu caso, vamos tentar uma proporção mais compacta.
+# Tente carregar a imagem fora da chamada st.image
+    try:
+        # 1. Carrega a imagem como um objeto PIL
+        img_logo = Image.open("aaok.png")
 
-    col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 10, 2]) 
-    # Proporção [3, 4, 3] fará com que a imagem ocupe menos da metade da largura da sidebar.
+        col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 10, 2]) 
 
-    with col_logo:
-        # Usamos use_container_width=True dentro da pequena coluna (col_logo),
-        # limitando assim o tamanho máximo da imagem à largura dessa coluna (cerca de 40% da sidebar).
-        st.image("aa.png", use_container_width=True)
+        with col_logo:
+            # 2. Passa o objeto PIL carregado para st.image
+            st.image(img_logo, use_container_width=True)
+
+    except FileNotFoundError:
+        # Trata o erro se for o caso
+        st.sidebar.error("Erro: Arquivo de imagem 'logo2.png' não encontrado!")
+    except Exception as e:
+        # Trata outros erros de carregamento/formato
+        st.sidebar.error(f"Erro ao carregar a imagem: {e}")
     
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
