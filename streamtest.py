@@ -185,7 +185,7 @@ with st.sidebar:
 
         with col_logo:
             # 2. Passa o objeto PIL carregado para st.image
-            st.image(img_logo, use_container_width=True)
+            st.image(img_logo, width="stretch")
 
     except FileNotFoundError:
         # Trata o erro se for o caso
