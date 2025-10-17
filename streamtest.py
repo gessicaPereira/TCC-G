@@ -186,13 +186,13 @@ with st.sidebar:
     # Se você quer a imagem menor, use, por exemplo: [2, 2, 2]. 
     # Para o seu caso, vamos tentar uma proporção mais compacta.
 
-    col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 6, 2]) 
+    col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 10, 2]) 
     # Proporção [3, 4, 3] fará com que a imagem ocupe menos da metade da largura da sidebar.
 
     with col_logo:
         # Usamos use_container_width=True dentro da pequena coluna (col_logo),
         # limitando assim o tamanho máximo da imagem à largura dessa coluna (cerca de 40% da sidebar).
-        st.image("logo2.jpg", use_container_width=True)
+        st.image("aaok.png", use_container_width=True)
     
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
@@ -205,7 +205,7 @@ with st.sidebar:
             # Container do menu
             "container": {
                 "padding": "0!important", 
-                "background-color": "#ffffff", 
+                "background-color": "#F5F5F5", 
                 "border-radius": "8px"
             },
             # Ícone (removendo a cor global para tratar nos links)
