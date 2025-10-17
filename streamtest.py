@@ -192,7 +192,7 @@ with st.sidebar:
     with col_logo:
         # Usamos use_container_width=True dentro da pequena coluna (col_logo),
         # limitando assim o tamanho máximo da imagem à largura dessa coluna (cerca de 40% da sidebar).
-        st.image("aaok.png", use_container_width=True)
+        st.image("aa.png", use_container_width=True)
     
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
     # 3. MENU: O título foi removido (None), e ajustamos os estilos.
