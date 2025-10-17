@@ -42,7 +42,7 @@ rpds-py==0.15.2
 seaborn==0.13.0
 six==1.16.0
 smmap==5.0.1
-streamlit==1.36.0
+streamlit==1.29.0
 streamlit-folium==0.17.4
 streamlit-option-menu==0.3.6
 tenacity==8.2.3

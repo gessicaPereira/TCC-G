@@ -176,26 +176,7 @@ dfloc.dropna(subset=['Latitude', 'Longitude'], inplace=True)
 # --- Sidebar com Option Menu ---
 # --- Sidebar com Option Menu Corrigido ---
 with st.sidebar:
-# Tente carregar a imagem fora da chamada st.image
-    try:
-        # 1. Carrega a imagem como um objeto PIL
-        img_logo = Image.open("aaok.png")
 
-        col_vazia_esq, col_logo, col_vazia_dir = st.columns([2, 10, 2]) 
-
-        with col_logo:
-            # 2. Passa o objeto PIL carregado para st.image
-            st.image(img_logo, width="stretch")
-
-    except FileNotFoundError:
-        # Trata o erro se for o caso
-        st.sidebar.error("Erro: Arquivo de imagem 'logo2.png' não encontrado!")
-    except Exception as e:
-        # Trata outros erros de carregamento/formato
-        st.sidebar.error(f"Erro ao carregar a imagem: {e}")
-    
-    # 3. MENU: O título foi removido (None), e ajustamos os estilos.
-    # 3. MENU: O título foi removido (None), e ajustamos os estilos.
     choose = option_menu(
         menu_title="Menu de Navegação",
         options=["Sobre", "Estabelecimentos", "Localizações"],
@@ -470,7 +451,6 @@ elif choose == "Localizações":
                     st.markdown(f"""
                         <div class="info-box">
                             <p><strong>Nome Fantasia:</strong> {row['NOME FANT']}</p>
-                            <p><strong>CNPJ:</strong> {row['CNPJ B']}</p>
                             <p><strong>Data de Início da Atividade:</strong> {row['DT IN ATV']}</p>
                             <p><strong>Endereço:</strong> {row['LOGRD']}, {row['NUMERO']} - {row['BAIRRO']}, {row['MUNICIPIO']}</p>
                             <p><strong>CEP:</strong> {row['CEP']}</p>
