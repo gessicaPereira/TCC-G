@@ -516,25 +516,16 @@ elif choose == "Sobre":
 
     with col_about1:
         st.markdown("""
-        O **Cedro Localize** é uma aplicação desenvolvida como **Trabalho de Conclusão de Curso (TCC)**
-        do bacharelado em Sistemas de Informação do **Instituto Federal do Ceará (IFCE), campus Cedro**.
 
-        Nosso principal objetivo é fornecer uma **ferramenta analítica e interativa** para
-        **empreendedores, pesquisadores e gestores públicos** na cidade de Cedro, Ceará.
-        Através da visualização e análise de dados sobre estabelecimentos comerciais,
-        o Cedro Localize busca:
+        O **Cedro Localize** é um projeto de TCC desenvolvido para o curso de **Sistemas de Informação do IFCE - Campus Cedro**.
 
-        * **Auxiliar no processo decisório** de novos negócios, investimentos e expansões.
-        * Proporcionar uma **visão ampla e detalhada** sobre o cenário empreendedor local.
-        * Identificar **tendências de mercado**, como atividades em crescimento ou declínio.
-        * Mapear a **distribuição geográfica** dos estabelecimentos, auxiliando na logística e planejamento urbano.
+        Esta ferramenta busca contribuir para a **democratização do acesso aos dados** locais, permitindo que qualquer pessoa entenda o panorama geral do cenário empresarial da cidade de forma simples e visual.
 
-        Acreditamos que, ao democratizar o acesso a informações relevantes sobre o ecossistema empresarial de Cedro,
-        podemos contribuir significativamente para o **desenvolvimento econômico** e a **inovação** em nossa comunidade.
+        **Nota:** As informações e tendências apresentadas utilizam dados coletados até o ano de **2023**.
         """)
     with col_about2:
         st.image("1111.jpg",
-                  caption="Uma visão detalhada do cenário empresarial de Cedro, CE.")
+                  caption="Uma visão detalhada do cenário empresarial de Cedro, CE (Dados até 2023). ")
         st.markdown("""
             **Desenvolvido por:** Géssica Pereira da Silva
             <br>
