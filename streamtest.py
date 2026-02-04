@@ -486,6 +486,7 @@ elif choose == "Localizações":
 
         m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
         marker_cluster = MarkerCluster().add_to(m)
+        dfloc_brasil = dfloc_brasil.head(200)
 
     # 2. Uso de CircleMarker (Essencial para não dar MarshallComponentException)
         for index, row in dfloc_brasil.iterrows():
