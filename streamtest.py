@@ -467,42 +467,36 @@ elif choose == "Localizações":
     st.markdown("### Distribuição Geográfica dos Estabelecimentos")
     st.markdown("Visualize a dispersão geográfica de todos os estabelecimentos geolocalizados na cidade.")
 
-# Verifica se o DataFrame não está vazio
+    dfloc_brasil = pd.DataFrame()
+
     if not dfloc.empty:
-    # Filtra apenas coordenadas dentro dos limites do Brasil
         dfloc_brasil = dfloc[
-        (dfloc['Latitude'].between(-35.0, 5.0)) &
-        (dfloc['Longitude'].between(-75.0, -30.0))
+            (dfloc['Latitude'].between(-35.0, 5.0)) &
+            (dfloc['Longitude'].between(-75.0, -30.0))
         ]
 
+        dfloc_brasil['Latitude'] = pd.to_numeric(dfloc_brasil['Latitude'], errors='coerce')
+        dfloc_brasil['Longitude'] = pd.to_numeric(dfloc_brasil['Longitude'], errors='coerce')
+        dfloc_brasil = dfloc_brasil.dropna(subset=['Latitude', 'Longitude'])
+
     if not dfloc_brasil.empty:
-        # 1. Otimização de dados: mantém apenas o necessário e limita a precisão
-        dfloc_brasil = dfloc_brasil.copy()
-        dfloc_brasil['Latitude'] = dfloc_brasil['Latitude'].round(5)
-        dfloc_brasil['Longitude'] = dfloc_brasil['Longitude'].round(5)
+        center_lat = float(dfloc_brasil['Latitude'].mean())
+        center_lon = float(dfloc_brasil['Longitude'].mean())
 
-        center_lat = dfloc_brasil['Latitude'].mean()
-        center_lon = dfloc_brasil['Longitude'].mean()
-
-        m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
+        m = folium.Map(location=[center_lat, center_lon], zoom_start=12)
         marker_cluster = MarkerCluster().add_to(m)
-        dfloc_brasil = dfloc_brasil.head(200)
 
-    # 2. Uso de CircleMarker (Essencial para não dar MarshallComponentException)
-        for index, row in dfloc_brasil.iterrows():
-            if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
-                folium.CircleMarker(
-                    location=[row['Latitude'], row['Longitude']],
-                    radius=5,
-                    # Evite colocar muito texto ou HTML complexo no popup
-                    popup=f"{row['NOME FANT']}", 
-                    color='blue',
-                    fill=True,
-                    fill_opacity=0.7
-                ).add_to(marker_cluster)
+        for _, row in dfloc_brasil.iterrows():
+            nome = str(row['NOME FANT']) if pd.notna(row['NOME FANT']) else "Sem nome"
+            bairro = str(row['BAIRRO']) if pd.notna(row['BAIRRO']) else "Sem bairro"
 
-        # 3. Use uma largura menor ou responsiva para testar
-        st_data = st_folium(m, width=700, height=500, key="mapa_brasil")
+            folium.Marker(
+                location=[float(row['Latitude']), float(row['Longitude'])],
+                popup=f"<b>{nome}</b><br>Bairro: {bairro}",
+                tooltip=nome
+            ).add_to(marker_cluster)
+
+        st_folium(m, width=900, height=500)
 
     else:
         st.warning("Nenhum ponto com coordenadas válidas no Brasil foi encontrado.")
