@@ -484,6 +484,9 @@ elif choose == "Localizações":
 
         center_lat = dfloc_brasil['Latitude'].mean()
         center_lon = dfloc_brasil['Longitude'].mean()
+        if len(dfloc_brasil) > 500:
+        dfloc_brasil = dfloc_brasil.head(500)
+        st.warning("Exibindo apenas os primeiros 500 pontos para garantir performance.")
 
         m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
         marker_cluster = MarkerCluster().add_to(m)
