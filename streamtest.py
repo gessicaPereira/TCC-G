@@ -244,7 +244,7 @@ if choose == "Estabelecimentos":
     df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')          
     df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')  
 
-    df = df.dropna(subset=['DATA STC'])              
+    df = df[df['DATA STC'].notna()]
     df_inativas = df_inativas.dropna(subset=['DATA STC'])  
     st.markdown("### Dinâmica de Abertura e Encerramento ao Longo do Tempo")
     col_graph1, col_graph2 = st.columns(2)
