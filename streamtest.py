@@ -531,9 +531,3 @@ elif choose == "Sobre":
             <br>
             **Instituição:** IFCE Campus Cedro
         """, unsafe_allow_html=True)
-
-
-
-
-
-
