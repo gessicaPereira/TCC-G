@@ -243,8 +243,6 @@ if choose == "Estabelecimentos":
 
     df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')          
     df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')  
-    st.dataframe(df.head())
-
 
     df = df.dropna(subset=['DATA STC'])              
     df_inativas = df_inativas.dropna(subset=['DATA STC'])  
