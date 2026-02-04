@@ -476,35 +476,32 @@ elif choose == "Localizações":
         ]
 
     if not dfloc_brasil.empty:
-        # Calcula os limites e centro
-        min_lat = dfloc_brasil['Latitude'].min()
-        max_lat = dfloc_brasil['Latitude'].max()
-        min_lon = dfloc_brasil['Longitude'].min()
-        max_lon = dfloc_brasil['Longitude'].max()
+        # 1. Otimização de dados: mantém apenas o necessário e limita a precisão
+        dfloc_brasil = dfloc_brasil.copy()
+        dfloc_brasil['Latitude'] = dfloc_brasil['Latitude'].round(5)
+        dfloc_brasil['Longitude'] = dfloc_brasil['Longitude'].round(5)
 
         center_lat = dfloc_brasil['Latitude'].mean()
         center_lon = dfloc_brasil['Longitude'].mean()
-        if len(dfloc_brasil) > 500:
-            dfloc_brasil = dfloc_brasil.head(500)
-            st.warning("Exibindo apenas os primeiros 500 pontos para garantir performance.")
 
         m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
         marker_cluster = MarkerCluster().add_to(m)
 
+    # 2. Uso de CircleMarker (Essencial para não dar MarshallComponentException)
         for index, row in dfloc_brasil.iterrows():
             if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
                 folium.CircleMarker(
                     location=[row['Latitude'], row['Longitude']],
-                    radius=7,
-                    popup=f"{row['NOME FANT']} - {row['BAIRRO']}", 
-                    tooltip=row['NOME FANT'],
-                    color="blue",
+                    radius=5,
+                    # Evite colocar muito texto ou HTML complexo no popup
+                    popup=f"{row['NOME FANT']}", 
+                    color='blue',
                     fill=True,
-                    fill_color="blue"
+                    fill_opacity=0.7
                 ).add_to(marker_cluster)
 
-        m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
-        st_data = st_folium(m, width=900, height=500)
+        # 3. Use uma largura menor ou responsiva para testar
+        st_data = st_folium(m, width=700, height=500, key="mapa_brasil")
 
     else:
         st.warning("Nenhum ponto com coordenadas válidas no Brasil foi encontrado.")
