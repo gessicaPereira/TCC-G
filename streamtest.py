@@ -240,6 +240,12 @@ if choose == "Estabelecimentos":
     st.markdown("---")
 
     # --- Gráficos de Tendência (Ativos e Inativos) ---
+
+    df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')          
+    df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')  
+
+    df = df.dropna(subset=['DATA STC'])              
+    df_inativas = df_inativas.dropna(subset=['DATA STC'])  
     st.markdown("### Dinâmica de Abertura e Encerramento ao Longo do Tempo")
     col_graph1, col_graph2 = st.columns(2)
 
@@ -252,9 +258,10 @@ if choose == "Estabelecimentos":
         max_year_ativos = int(contagem_anos_ativos['Ano'].max()) if not contagem_anos_ativos.empty else 2025
         selected_years_ativos = st.slider(
             "Selecione o intervalo de anos (Ativos)",
-            min_year_ativos,
-            max_year_ativos,
-            (min_year_ativos, max_year_ativos),
+            min_value=min_year_ativos,                 # 🔧 ALTERADO (antes era posicional)
+            max_value=max_year_ativos,                 # 🔧 ALTERADO
+            value=(min_year_ativos, max_year_ativos),  # 🔧 ALTERADO (garante ordem correta)
+            step=1,                                    # ✅ NOVO
             key="slider_ativos"
         )
         filtered_data_ativos = contagem_anos_ativos[(contagem_anos_ativos['Ano'] >= selected_years_ativos[0]) &
@@ -269,6 +276,7 @@ if choose == "Estabelecimentos":
                      template='plotly_white')
             fig_ativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             fig_ativos.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_ativos.update_xaxes(type='category')
             st.plotly_chart(fig_ativos, use_container_width=True)
         else:
             st.info("Não há dados de estabelecimentos ativos para o período selecionado.")
@@ -282,9 +290,10 @@ if choose == "Estabelecimentos":
         max_year_inativos = int(contagem_anos_inativos['Ano'].max()) if not contagem_anos_inativos.empty else 2025
         selected_years_inativos = st.slider(
             "Selecione o intervalo de anos (Inativos)",
-            min_year_inativos,
-            max_year_inativos,
-            (min_year_inativos, max_year_inativos),
+            min_value=min_year_inativos,                 # 🔧 ALTERADO
+            max_value=max_year_inativos,                 # 🔧 ALTERADO
+            value=(min_year_inativos, max_year_inativos),# 🔧 ALTERADO
+            step=1,                                      # ✅ NOVO
             key="slider_inativos"
         )
         filtered_data_inativos = contagem_anos_inativos[(contagem_anos_inativos['Ano'] >= selected_years_inativos[0]) &
@@ -294,11 +303,12 @@ if choose == "Estabelecimentos":
             fig_inativos = px.bar(filtered_data_inativos, x='Ano', y='Quantidade',
                                   labels={'Quantidade': 'Quantidade de Encerramentos', 'Ano': 'Ano'},
                                   text='Quantidade',
-                                  title='Estabelecimentos Ativos por Ano',  # Adicione esta linha
+                                  title='Estabelecimentos Inativos por Ano',  # Adicione esta linha
                                   color_discrete_sequence=px.colors.qualitative.Pastel,
                                   template='plotly_white')
             fig_inativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             fig_inativos.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_inativos.update_xaxes(type='category')
             st.plotly_chart(fig_inativos, use_container_width=True)
         else:
             st.info("Não há dados de estabelecimentos inativos para o período selecionado.")
