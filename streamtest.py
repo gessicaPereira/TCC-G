@@ -485,24 +485,22 @@ elif choose == "Localizações":
         center_lat = dfloc_brasil['Latitude'].mean()
         center_lon = dfloc_brasil['Longitude'].mean()
 
-        # Cria o mapa centralizado
         m = folium.Map(location=[center_lat, center_lon], zoom_start=14)
         marker_cluster = MarkerCluster().add_to(m)
 
-        # Adiciona os marcadores ao mapa
         for index, row in dfloc_brasil.iterrows():
             if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
-                folium.Marker(
+                folium.CircleMarker(
                     location=[row['Latitude'], row['Longitude']],
-                    popup=f"**{row['NOME FANT']}**<br>Bairro: {row['BAIRRO']}",
+                    radius=7,
+                    popup=f"{row['NOME FANT']} - {row['BAIRRO']}", 
                     tooltip=row['NOME FANT'],
-                    icon=folium.Icon(color='blue', icon='info-sign')
+                    color="blue",
+                    fill=True,
+                    fill_color="blue"
                 ).add_to(marker_cluster)
 
-        # Ajusta o mapa para os limites dos pontos
-        m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]], padding=(5, 5))
-
-        # Mostra o mapa no Streamlit
+        m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
         st_data = st_folium(m, width=900, height=500)
 
     else:
