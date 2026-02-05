@@ -264,7 +264,8 @@ if choose == "Estabelecimentos":
             step=1,                                    # ✅ NOVO
             key="slider_ativos"
         )
-        filtered_data_ativos['Ano'] = filtered_data_ativos['Ano'].astype(str)
+        filtered_data_ativos = contagem_anos_ativos[(contagem_anos_ativos['Ano'] >= selected_years_ativos[0]) &
+                                                    (contagem_anos_ativos['Ano'] <= selected_years_ativos[1])]
         
         if not filtered_data_ativos.empty:
             fig_ativos = px.bar(filtered_data_ativos, x='Ano', y='Quantidade',
@@ -294,8 +295,8 @@ if choose == "Estabelecimentos":
             step=1,                                      # ✅ NOVO
             key="slider_inativos"
         )
-        filtered_data_inativos['Ano'] = filtered_data_inativos['Ano'].astype(str)
-
+        filtered_data_inativos = contagem_anos_inativos[(contagem_anos_inativos['Ano'] >= selected_years_inativos[0]) &
+                                                         (contagem_anos_inativos['Ano'] <= selected_years_inativos[1])]
         
         if not filtered_data_inativos.empty:
             fig_inativos = px.bar(filtered_data_inativos, x='Ano', y='Quantidade',
