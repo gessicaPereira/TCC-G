@@ -2,10 +2,10 @@ streamlit==1.29.0
 streamlit-folium==0.18.0
 folium==0.15.1
 
-pandas
+pandas>=2.0.0
+plotly>=5.18.0
 matplotlib
 seaborn
-plotly
 streamlit-option-menu
 pydeck
 altair

@@ -312,7 +312,6 @@ if choose == "Estabelecimentos":
             st.info("Não há dados de estabelecimentos inativos para o período selecionado.")
 
     st.markdown("---")
-    st.write(filtered_data_ativos)
 
     # --- Análise por Atividade Econômica (Ativas e Inativas) ---
     st.markdown("### Análise por Classificação de Atividades Econômicas (CNAE)")
