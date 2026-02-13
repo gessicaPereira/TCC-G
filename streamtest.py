@@ -248,17 +248,18 @@ if choose == "Estabelecimentos":
 
     # --- Gráficos de Tendência (Ativos e Inativos) ---
 
-    df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')          
-    df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')  
+    df['DT IN ATV'] = pd.to_datetime(df['DT IN ATV'], errors='coerce')
+    df = df.dropna(subset=['DT IN ATV'])      
 
-    df = df.dropna(subset=['DATA STC'])              
-    df_inativas = df_inativas.dropna(subset=['DATA STC'])  
+    df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')
+    df_inativas = df_inativas.dropna(subset=['DATA STC'])
+
     st.markdown("### Dinâmica de Abertura e Encerramento ao Longo do Tempo")
     col_graph1, col_graph2 = st.columns(2)
 
     with col_graph1:
         st.subheader("Estabelecimentos Ativos por Ano")
-        contagem_anos_ativos = df.groupby(df['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
+        contagem_anos_ativos = df.groupby(df['DT IN ATV'].dt.year)['CNPJ O'].count().reset_index()
         contagem_anos_ativos.columns = ['Ano', 'Quantidade']
         
         min_year_ativos = int(contagem_anos_ativos['Ano'].min()) if not contagem_anos_ativos.empty else 2000
