@@ -158,7 +158,7 @@ st.markdown("""
 # --- Carregamento de Dados ---
 # Substitua por seus caminhos reais dos arquivos CSV
 try:
-    df = pd.read_csv('estabcnaeok.csv')
+    df = pd.read_csv('estabcnaeok.csv', index_col=0)
     df_inativas = pd.read_csv('estab_inativos_ok.csv')
     dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
 except FileNotFoundError:
