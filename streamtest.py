@@ -161,6 +161,9 @@ try:
     df = pd.read_csv('estabcnaeok.csv', index_col=False)
     df_inativas = pd.read_csv('estab_inativos_ok.csv')
     dfloc = pd.read_csv('estabGeolocalizadoOK.csv')
+
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    df_inativas = df_inativas.loc[:, ~df_inativas.columns.str.contains('^Unnamed')]
 except FileNotFoundError:
     st.error("Erro: Verifique se os arquivos CSV ('estabcnaeok.csv', 'estab_inativos_ok.csv', 'estabGeolocalizadoOK.csv') estão no mesmo diretório da aplicação.")
     st.stop()
