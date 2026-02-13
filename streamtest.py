@@ -169,6 +169,8 @@ except FileNotFoundError:
     st.stop()
 
 st.write(df.columns)
+st.write("Quantidade de linhas:", len(df))
+st.write(df.head())
 
 # Conversão de colunas de data para datetime
 df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')
