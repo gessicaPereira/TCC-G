@@ -165,6 +165,8 @@ except FileNotFoundError:
     st.error("Erro: Verifique se os arquivos CSV ('estabcnaeok.csv', 'estab_inativos_ok.csv', 'estabGeolocalizadoOK.csv') estão no mesmo diretório da aplicação.")
     st.stop()
 
+st.write(df.columns)
+
 # Conversão de colunas de data para datetime
 df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')
 df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], errors='coerce')
