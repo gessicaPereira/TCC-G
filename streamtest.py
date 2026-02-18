@@ -168,9 +168,7 @@ except FileNotFoundError:
     st.error("Erro: Verifique se os arquivos CSV ('estabcnaeok.csv', 'estab_inativos_ok.csv', 'estabGeolocalizadoOK.csv') estão no mesmo diretório da aplicação.")
     st.stop()
 
-st.write(df.columns)
-st.write("Quantidade de linhas:", len(df))
-st.write(df.head())
+
 
 # Conversão de colunas de data para datetime
 df['DATA STC'] = pd.to_datetime(df['DATA STC'], errors='coerce')
@@ -284,6 +282,7 @@ if choose == "Estabelecimentos":
                      template='plotly_white')
             fig_ativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             fig_ativos.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_ativos.update_xaxes(type='category', tickangle=45)
             st.plotly_chart(fig_ativos, use_container_width=True)
         else:
             st.info("Não há dados de estabelecimentos ativos para o período selecionado.")
@@ -315,6 +314,7 @@ if choose == "Estabelecimentos":
                                   template='plotly_white')
             fig_inativos.update_layout(height=500, title_x=0.05, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             fig_inativos.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_inativos.update_xaxes(type='category', tickangle=45)
             st.plotly_chart(fig_inativos, use_container_width=True)
         else:
             st.info("Não há dados de estabelecimentos inativos para o período selecionado.")
