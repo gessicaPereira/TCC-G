@@ -291,6 +291,7 @@ if choose == "Estabelecimentos":
         st.subheader("Estabelecimentos Inativos por Ano")
         contagem_anos_inativos = df_inativas.groupby(df_inativas['DATA STC'].dt.year)['CNPJ O'].count().reset_index()
         contagem_anos_inativos.columns = ['Ano', 'Quantidade']
+        contagem_anos_inativos['Ano'] = contagem_anos_inativos['Ano'].astype(int)
 
         min_year_inativos = int(contagem_anos_inativos['Ano'].min()) if not contagem_anos_inativos.empty else 2000
         max_year_inativos = int(contagem_anos_inativos['Ano'].max()) if not contagem_anos_inativos.empty else 2025
