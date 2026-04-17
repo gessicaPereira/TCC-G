@@ -24,13 +24,13 @@ st.markdown("""
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #333;
-        background-color: #f0f2f6; /* Fundo mais claro e suave para o dashboard */
+        background-color: #f0f2f6; 
     }
 
     /* Títulos principais da página */
     h1 {
-        color: #2c3e50; /* Cor mais escura para títulos principais */
-        font-size: 2.5em; /* Tamanho maior para o título da página */
+        color: #2c3e50; 
+        font-size: 2.5em; 
         margin-bottom: 0.5em;
     }
     h2, h3, h4, h5, h6 {
@@ -38,8 +38,8 @@ st.markdown("""
     }
 
     /* Sidebar */
-    .css-1d391kg, .css-1dp5vir { /* Classes do Streamlit para a sidebar */
-        background-color: #f0f2f6; /* Fundo branco para sidebar */
+    .css-1d391kg, .css-1dp5vir { 
+        background-color: #f0f2f6; 
         padding: 10px;
         border-right: 1px solid #e0e4eb;
     }
@@ -47,7 +47,6 @@ st.markdown("""
         color: #2c3e50;
     }
 
-    /* Ajuste para o número grande de estabelecimentos (Card de Métrica) */
     .big-number-container {
         display: flex;
         flex-direction: column;
@@ -56,14 +55,14 @@ st.markdown("""
         background-color: #ffffff;
         padding: 30px;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para o card */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
         text-align: center;
     }
     .big-number {
-        font-size: 60px; /* Aumenta o tamanho do número */
+        font-size: 60px; 
         font-weight: bold;
-        color: #4A90E2; /* Cor primária para o número */
+        color: #4A90E2; 
         margin-bottom: 5px;
     }
     .big-number-label {
@@ -78,28 +77,28 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     .stAlert > div > svg { /* Ícones dentro dos alerts */
-        color: #ffffff !important; /* Força a cor branca para os ícones */
+        color: #ffffff !important;
     }
-    .stAlert.info { background-color: #4A90E2; color: white; } /* Azul para info */
+    .stAlert.info { background-color: #4A90E2; color: white; } 
     .stAlert.info strong { color: white; }
-    .stAlert.warning { background-color: #f7b731; color: white; } /* Laranja para warning */
+    .stAlert.warning { background-color: #f7b731; color: white; } 
     .stAlert.warning strong { color: white; }
-    .stAlert.success { background-color: #2ecc71; color: white; } /* Verde para success */
+    .stAlert.success { background-color: #2ecc71; color: white; } 
     .stAlert.success strong { color: white; }
-    .stAlert p { margin-bottom: 5px; } /* Ajusta o espaçamento interno dos alerts */
+    .stAlert p { margin-bottom: 5px; } 
 
     /* Estilo para tabelas de dados (st.dataframe) */
     .stDataFrame {
         border-radius: 8px;
-        overflow: hidden; /* Garante que a borda arredondada funcione */
+        overflow: hidden; 
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     /* Estilo para caixas de informações (nos detalhes do estabelecimento na busca) */
     .info-box {
-        background-color: #e0e4eb; /* Fundo suave para a caixa de info */
+        background-color: #e0e4eb; 
         padding: 15px;
-        border-left: 5px solid #4A90E2; /* Uma borda colorida para destaque */
+        border-left: 5px solid #4A90E2; 
         border-radius: 8px;
         margin-bottom: 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -108,7 +107,6 @@ st.markdown("""
         margin: 5px 0;
     }
 
-    /* Ajuste para o estilo do expander */
     .streamlit-expanderHeader {
         background-color: #ffffff;
         border-radius: 8px;
@@ -123,7 +121,6 @@ st.markdown("""
         padding: 15px;
     }
 
-    /* Ajuste para o seletor de caixa */
     .stSelectbox div[data-baseweb="select"] {
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -131,24 +128,19 @@ st.markdown("""
     .css-1dp5vir .menu-list ul li a svg {
         fill: #4A90E2 !important; 
     }
-    /* Cor do ícone quando selecionado (Branco) */
     .css-1dp5vir .menu-list ul li .nav-link-selected svg {
         fill: white !important;
     }
     .st-emotion-cache-1wivc8r { /* Título do menu na sidebar */
-        margin-top: -10px; /* Reduz a margem superior do título "Menu de Navegação" */
-        margin-bottom: 5px; /* Ajusta a margem inferior do título */
+        margin-top: -10px; 
+        margin-bottom: 5px; 
     }
-        /* NOVO: Reduz o padding superior da sidebar */
-    /* Aponta para a div pai que contém todo o conteúdo da sidebar */
     .st-emotion-cache-vk33c6, .st-emotion-cache-1d391kg { /* Classes que podem controlar o padding da sidebar */
-        padding-top: 0rem; /* Remove o padding superior */
+        padding-top: 0rem;
     }
 
-    /* NOVO: Ajusta a margem superior da div principal dentro da sidebar */
-    /* Aponta para a div que engloba a imagem e o menu */
     .st-emotion-cache-16txt4v { /* Classe que envolve a imagem e o menu */
-        margin-top: -40px; /* Puxa para cima, ajuste este valor se necessário */
+        margin-top: -40px; 
     }
 
 
@@ -156,7 +148,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Carregamento de Dados ---
-# Substitua por seus caminhos reais dos arquivos CSV
 try:
     df = pd.read_csv('estabcnaeok.csv', index_col=False)
     df_inativas = pd.read_csv('estab_inativos_ok.csv')
@@ -179,7 +170,6 @@ dfloc['Longitude'] = pd.to_numeric(dfloc['Longitude'], errors='coerce')
 dfloc.dropna(subset=['Latitude', 'Longitude'], inplace=True)
 
 # --- Sidebar com Option Menu ---
-# --- Sidebar com Option Menu Corrigido ---
 with st.sidebar:
 
     choose = option_menu(
@@ -194,12 +184,10 @@ with st.sidebar:
                 "background-color": "#F5F5F5", 
                 "border-radius": "8px"
             },
-            # Ícone (removendo a cor global para tratar nos links)
             "icon": {
                 "font-size": "18px",
                 "margin-right": "10px"
             },
-            # Links/Itens do menu (estado NORMAL)
             "nav-link": {
                 "font-size": "16px",
                 "text-align": "left",
@@ -208,15 +196,11 @@ with st.sidebar:
                 "--hover-color": "#e0e4eb",
                 "border-radius": "5px",
                 "color": "#333333" 
-                # Defina o ícone azul (cor normal) AQUI:
-                # Seleciona o ícone SVG dentro do link
             },
-            # Link selecionado (estado ATIVO/AZUL)
             "nav-link-selected": {
                 "background-color": "#4A90E2", 
                 "color": "white",
                 "font-weight": "600",
-                # Defina o ícone BRANCO (cor selecionada) AQUI:
             },
             
         }
@@ -246,9 +230,6 @@ if choose == "Estabelecimentos":
 
     # --- Gráficos de Tendência (Ativos e Inativos) ---
 
-# --- Gráficos de Tendência (Versão Simplificada e Robusta) ---
-
-# 1. Tratamento de datas (Garanta que isso aconteça apenas uma vez)
     df['DT IN ATV'] = pd.to_datetime(df['DT IN ATV'], dayfirst=True, errors='coerce')
     df_inativas['DATA STC'] = pd.to_datetime(df_inativas['DATA STC'], dayfirst=True, errors='coerce')
 
@@ -258,7 +239,6 @@ if choose == "Estabelecimentos":
     with col_graph1:
         st.subheader("Estabelecimentos Ativos por Ano")
         
-        # Criar a contagem e garantir que o Ano seja STRING para evitar eixos numéricos quebrados
         df_ativos_count = df.copy()
         df_ativos_count['Ano'] = df_ativos_count['DT IN ATV'].dt.year
         df_ativos_count = df_ativos_count.dropna(subset=['Ano'])
@@ -277,9 +257,7 @@ if choose == "Estabelecimentos":
                 (contagem_anos_ativos['Ano'] <= selected_years[1])
             ].copy()
             
-            # --- MUDANÇA AQUI: Usando st.bar_chart para testar estabilidade ---
             if not filtered.empty:
-                # Transformamos o Ano em índice para o Streamlit entender o eixo X
                 chart_data = filtered.set_index('Ano')['Quantidade']
                 st.bar_chart(chart_data, color="#636EFA")
             else:
@@ -360,7 +338,7 @@ if choose == "Estabelecimentos":
         if st.button("Fechar Tabela de Atividades Ativas", key="btn_tabela_ativos_hide"):
             st.session_state.show_table_ativos = False
 
-    st.markdown("---") # Separador para o próximo gráfico
+    st.markdown("---") 
 
     # Gráfico de Atividades Econômicas Encerradas
     st.subheader("Top Atividades Econômicas Encerradas")
